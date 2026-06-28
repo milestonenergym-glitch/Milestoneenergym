@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getGymSettings, updateGymSettings } from '@/app/actions/settings'
 import { toast } from 'sonner'
-import { Save, MapPin, Phone, Mail, Clock, Globe, Activity } from 'lucide-react'
+import { Save, MapPin, Phone, Mail, Clock, Globe, Activity, Hash } from 'lucide-react'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null)
@@ -34,6 +34,11 @@ export default function SettingsPage() {
       youtubeUrl: formData.get('youtubeUrl') as string,
       googleAnalyticsId: formData.get('googleAnalyticsId') as string,
       metaPixelId: formData.get('metaPixelId') as string,
+      statsTotalMembers: formData.get('statsTotalMembers') as string,
+      statsCertifiedTrainers: formData.get('statsCertifiedTrainers') as string,
+      statsPremiumEquipment: formData.get('statsPremiumEquipment') as string,
+      statsGoogleRating: formData.get('statsGoogleRating') as string,
+      statsYearsExcellence: formData.get('statsYearsExcellence') as string,
     }
 
     const res = await updateGymSettings(data)
@@ -110,6 +115,33 @@ export default function SettingsPage() {
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-1">Meta Pixel ID</label>
               <input type="text" name="metaPixelId" defaultValue={settings?.metaPixelId} placeholder="e.g. 123456789012345" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+          </div>
+        </div>
+
+        {/* Homepage Statistics */}
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Hash className="w-5 h-5 text-brand-gold" /> Homepage Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Total Members (e.g. 2000)</label>
+              <input type="text" name="statsTotalMembers" defaultValue={settings?.statsTotalMembers || "2000"} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Certified Trainers (e.g. 15)</label>
+              <input type="text" name="statsCertifiedTrainers" defaultValue={settings?.statsCertifiedTrainers || "15"} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Premium Equipment (e.g. 150)</label>
+              <input type="text" name="statsPremiumEquipment" defaultValue={settings?.statsPremiumEquipment || "150"} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Google Rating (e.g. 4.8)</label>
+              <input type="text" name="statsGoogleRating" defaultValue={settings?.statsGoogleRating || "4.8"} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Years of Excellence (e.g. 8)</label>
+              <input type="text" name="statsYearsExcellence" defaultValue={settings?.statsYearsExcellence || "8"} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
             </div>
           </div>
         </div>

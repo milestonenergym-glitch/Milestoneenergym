@@ -41,6 +41,11 @@ export async function updateGymSettings(data: {
   metaPixelId?: string
   customPopupHtml?: string
   customPopupActive?: boolean
+  statsTotalMembers?: string
+  statsCertifiedTrainers?: string
+  statsPremiumEquipment?: string
+  statsGoogleRating?: string
+  statsYearsExcellence?: string
 }) {
   try {
     const settings = await prisma.gymSettings.findFirst()

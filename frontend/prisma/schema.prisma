@@ -99,6 +99,13 @@ model GymSettings {
   googleAnalyticsId String?
   metaPixelId       String?
 
+  // Homepage Stats
+  statsTotalMembers      String @default("2000")
+  statsCertifiedTrainers String @default("15")
+  statsPremiumEquipment  String @default("150")
+  statsGoogleRating      String @default("4.8")
+  statsYearsExcellence   String @default("8")
+
   updatedAt       DateTime @updatedAt
 }
 

@@ -15,6 +15,7 @@ import FreeTrialForm from '@/components/public/home/FreeTrialForm'
 import BlogPreview from '@/components/public/home/BlogPreview'
 import GoogleMapSection from '@/components/public/home/GoogleMapSection'
 import CTABanner from '@/components/public/home/CTABanner'
+import { getGymSettings } from '@/app/actions/settings'
 
 export const metadata: Metadata = {
   title: 'Milestone Energym — Train Hard. Stay Strong. | Premium Fitness Center',
@@ -26,12 +27,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const settings = await getGymSettings()
+
   return (
     <main>
       <Navbar />
       <HeroSection />
-      <StatsBar />
+      <StatsBar settings={settings} />
       <WhyChooseUs />
       <MembershipPreview />
       <ClassSchedule />
@@ -42,7 +45,7 @@ export default function HomePage() {
       <FreeTrialForm />
       <BlogPreview />
       <GoogleMapSection />
-      <CTABanner />
+      <CTABanner settings={settings} />
       <Footer />
       <FloatingButtons />
     </main>

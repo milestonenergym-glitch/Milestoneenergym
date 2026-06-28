@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Dumbbell, ArrowRight, Phone, Calendar } from 'lucide-react'
 
-export default function CTABanner() {
+export default function CTABanner({ settings }: { settings?: any }) {
   return (
     <section
       className="py-20 relative overflow-hidden"
@@ -45,7 +45,7 @@ export default function CTABanner() {
           </h2>
 
           <p className="text-white/70 text-xl md:text-2xl max-w-2xl mx-auto mb-12 leading-relaxed">
-            Join 2,000+ members who already transformed their lives at Milestone Energym.
+            Join {settings?.statsTotalMembers || "2000"}+ members who already transformed their lives at Milestone Energym.
             First step is always the hardest — we'll take it with you.
           </p>
 

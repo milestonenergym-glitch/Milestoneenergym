@@ -89,7 +89,7 @@ export default async function Footer() {
                 Start Your Fitness Journey Today
               </h3>
               <p className="text-white/60">
-                Join 2,000+ members transforming their lives at Milestone Energym.
+                Join {settings?.statsTotalMembers || "2000"}+ members transforming their lives at Milestone Energym.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">

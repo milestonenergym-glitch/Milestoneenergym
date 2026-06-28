@@ -49,9 +49,25 @@ const stats = [
   },
 ]
 
-export default function StatsBar() {
+export default function StatsBar({ settings }: { settings?: any }) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-50px' })
+
+  // Override with dynamic settings if available
+  const dynamicStats = stats.map(stat => {
+    if (!settings) return stat;
+    let newValue = stat.value;
+    if (stat.id === 'total-members' && settings.statsTotalMembers) newValue = parseFloat(settings.statsTotalMembers);
+    if (stat.id === 'certified-trainers' && settings.statsCertifiedTrainers) newValue = parseFloat(settings.statsCertifiedTrainers);
+    if (stat.id === 'gym-equipment' && settings.statsPremiumEquipment) newValue = parseFloat(settings.statsPremiumEquipment);
+    if (stat.id === 'google-rating' && settings.statsGoogleRating) newValue = parseFloat(settings.statsGoogleRating);
+    if (stat.id === 'years-experience' && settings.statsYearsExcellence) newValue = parseFloat(settings.statsYearsExcellence);
+    
+    return {
+      ...stat,
+      value: isNaN(newValue) ? stat.value : newValue
+    }
+  });
 
   return (
     <section
@@ -71,7 +87,7 @@ export default function StatsBar() {
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-blue to-transparent" />
 
           <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/8 divide-y md:divide-y-0">
-            {stats.map((stat, index) => {
+            {dynamicStats.map((stat, index) => {
               const Icon = stat.icon
               return (
                 <motion.div
