@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Sun, Moon, Phone, Dumbbell } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
+import { getGymSettings } from '@/app/actions/settings'
 
 /* ─── Navigation Structure ─── */
 const navLinks = [
@@ -59,8 +60,12 @@ export default function Navbar() {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
+  const [settings, setSettings] = useState<any>(null)
 
   useEffect(() => {
+    getGymSettings().then(data => setSettings(data))
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -100,6 +105,7 @@ export default function Navbar() {
                 alt="Milestone Energym Logo"
                 fill
                 className="object-contain"
+                style={{ clipPath: 'circle(45% at 50% 50%)' }}
                 priority
               />
             </div>
@@ -108,15 +114,18 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-1" ref={dropdownRef}>
             {navLinks.map((link) => (
-              <div key={link.label} className="relative">
+              <div
+                key={link.label}
+                className="relative"
+                onMouseEnter={() => setActiveDropdown(link.label)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
                 {link.children ? (
                   <button
                     className={cn(
                       'nav-link flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-white/5',
                       pathname.startsWith(link.href) && 'text-white'
                     )}
-                    onMouseEnter={() => setActiveDropdown(link.label)}
-                    onMouseLeave={() => setActiveDropdown(null)}
                     aria-haspopup="true"
                     aria-expanded={activeDropdown === link.label}
                     id={`nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -151,21 +160,21 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.97 }}
                         transition={{ duration: 0.18 }}
-                        className="absolute top-full left-0 mt-1 min-w-[200px] glass rounded-xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden"
-                        onMouseEnter={() => setActiveDropdown(link.label)}
-                        onMouseLeave={() => setActiveDropdown(null)}
+                        className="absolute top-full left-0 pt-2 min-w-[200px]"
                         role="menu"
                       >
-                        {link.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className="block px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
-                            role="menuitem"
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
+                        <div className="glass rounded-xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.5)] overflow-hidden">
+                          {link.children.map((child) => (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              className="block px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+                              role="menuitem"
+                            >
+                              {child.label}
+                            </Link>
+                          ))}
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -183,18 +192,22 @@ export default function Navbar() {
               aria-label="Toggle theme"
               id="theme-toggle"
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {mounted && (theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
             </button>
 
             {/* Phone */}
             <a
-              href="tel:+918875305442"
+              href={`tel:${settings?.contactPhone?.replace(/[^0-9+]/g, '') || '+918875305442'}`}
               className="hidden md:flex items-center gap-2 text-white/70 hover:text-white text-sm transition-colors"
               aria-label="Call us"
               id="nav-phone"
             >
-              <Phone className="w-4 h-4 text-brand-blue-300" />
-              <span className="hidden lg:inline">+91 88753 05442</span>
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+                <Phone className="w-4 h-4" />
+              </div>
+              <span className="font-medium tracking-wide">
+                {settings?.contactPhone || '+91 88753 05442'}
+              </span>
             </a>
 
             {/* Free Trial CTA */}

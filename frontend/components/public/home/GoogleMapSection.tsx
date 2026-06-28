@@ -8,7 +8,7 @@ export default function GoogleMapSection() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
-  const gymAddress = encodeURIComponent('Your Gym Address, City, State, India')
+  const gymAddress = encodeURIComponent('नवलाराम की चक्की, Near Crown Plaza NH68 जैसलमेर रोड बाड़मेर, Barmer, Rajasthan-344001')
   const googleMapsEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=${gymAddress}&zoom=15`
   const navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${gymAddress}`
 
@@ -86,8 +86,8 @@ export default function GoogleMapSection() {
                   <div>
                     <div className="text-white/40 text-xs font-semibold uppercase tracking-wider mb-1">Address</div>
                     <div className="text-white text-sm leading-relaxed">
-                      Your Gym Address,<br />
-                      City, State – 000000,<br />
+                      नवलाराम की चक्की, Near Crown Plaza NH68 जैसलमेर रोड बाड़मेर,<br />
+                      Barmer, Rajasthan - 344001,<br />
                       India
                     </div>
                   </div>

@@ -7,6 +7,8 @@ import { Toaster } from 'sonner'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import MetaPixel from '@/components/analytics/MetaPixel'
 import CookieBanner from '@/components/shared/CookieBanner'
+import LeadCapturePopup from '@/components/shared/LeadCapturePopup'
+import { Providers } from '@/components/Providers'
 
 /* ─── Fonts ─── */
 const inter = Inter({
@@ -180,7 +182,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="dark antialiased">
+      <body className="antialiased bg-white dark:bg-[#0A0A0A] text-black dark:text-white transition-colors duration-300">
         {/* Analytics */}
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
         <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID || ''} />
@@ -193,7 +195,10 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <QueryProvider>
-            {children}
+            <Providers>
+              {children}
+              <LeadCapturePopup />
+            </Providers>
             <Toaster
               position="top-right"
               theme="dark"

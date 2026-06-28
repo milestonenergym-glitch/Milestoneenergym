@@ -21,8 +21,8 @@ ABOUT THE GYM:
 - Tagline: Train Hard. Stay Strong.
 - Phone: +91 8875305442
 - WhatsApp: +91 8875305442
-- Email: info@milestoneenergym.com
-- Hours: Mon-Sat 5 AM - 11 PM, Sun 6 AM - 10 PM
+- Email: Milestonenergym@gmail.com
+- Hours: Monday To Saturday 5:30 AM to 10:30 PM, Sunday Off
 
 FACILITIES:
 - Imported Machines & Equipment

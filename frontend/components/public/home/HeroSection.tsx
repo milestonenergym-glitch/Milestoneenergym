@@ -13,6 +13,7 @@ import {
   Calendar,
   Zap,
 } from 'lucide-react'
+import { getGymSettings } from '@/app/actions/settings'
 
 const headlines = [
   'Train Hard.',
@@ -22,16 +23,30 @@ const headlines = [
 
 export default function HeroSection() {
   const [currentHeadline, setCurrentHeadline] = useState(0)
+  const [currentBg, setCurrentBg] = useState(0)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [settings, setSettings] = useState<any>(null)
   const heroRef = useRef<HTMLDivElement>(null)
 
-  // Cycle through headlines
+  const backgrounds = [
+    '/about-hero.png',
+    '/class-strength.png',
+    '/class-cardio.png',
+    '/class-crossfit.png'
+  ]
+
+  useEffect(() => {
+    getGymSettings().then(data => setSettings(data))
+  }, [])
+
+  // Cycle through headlines and backgrounds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentHeadline(prev => (prev + 1) % headlines.length)
-    }, 3000)
+      setCurrentBg(prev => (prev + 1) % backgrounds.length)
+    }, 4000)
     return () => clearInterval(timer)
-  }, [])
+  }, [backgrounds.length])
 
   // Parallax mouse effect
   useEffect(() => {
@@ -59,15 +74,21 @@ export default function HeroSection() {
           transform: `translate(${mousePos.x * 0.3}px, ${mousePos.y * 0.3}px) scale(1.05)`,
         }}
       >
-        {/* Use a fitness background image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/images/hero-bg.jpg')`,
-          }}
-        />
-        {/* Animated gradient background fallback */}
+        {/* Animated gradient background fallback (Must be behind images) */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#050510] via-[#0a0a1a] to-[#0a050a]" />
+
+        {/* Animated Background Images */}
+        {backgrounds.map((bg, index) => (
+          <div
+            key={bg}
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${
+              currentBg === index ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url('${bg}')`,
+            }}
+          />
+        ))}
 
         {/* Blue energy particles */}
         <div className="absolute inset-0 overflow-hidden">
@@ -113,36 +134,24 @@ export default function HeroSection() {
 
       {/* Content */}
       <div className="container-custom relative z-10 text-center px-4">
-        {/* Logo — Animated Entry */}
-        <motion.div
-          initial={{ scale: 0, rotate: -10, opacity: 0 }}
-          animate={{ scale: 1, rotate: 0, opacity: 1 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.2 }}
-          className="flex justify-center mb-8"
-        >
-          <div className="relative">
-            <div className="absolute inset-0 bg-brand-blue/20 rounded-full blur-2xl animate-pulse-blue" />
-            <Image
-              src="/logo.png"
-              alt="Milestone Energym"
-              width={120}
-              height={120}
-              className="relative z-10 w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 drop-shadow-[0_0_40px_rgba(15,82,186,0.6)]"
-              priority
-            />
-          </div>
-        </motion.div>
 
-        {/* Badge */}
+        {/* Badges */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="flex justify-center mb-6"
+          className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-6"
         >
           <div className="badge-gold">
             <Zap className="w-3 h-3" />
             Premium Fitness Center
+          </div>
+          <div className="bg-brand-blue/20 border border-brand-blue/40 text-blue-200 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide flex items-center gap-2 backdrop-blur-sm shadow-[0_0_15px_rgba(15,82,186,0.3)]">
+            <Calendar className="w-3.5 h-3.5 text-blue-400" />
+            Opening soon 9th July
+          </div>
+          <div className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2 backdrop-blur-sm animate-pulse">
+            🔥 Pre-Launch Offer - 50% Off
           </div>
         </motion.div>
 
@@ -153,8 +162,8 @@ export default function HeroSection() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <h1 className="font-display text-[clamp(3.5rem,10vw,8rem)] leading-[0.95] tracking-[-0.02em] text-white">
-              MILESTONE
+            <h1 className="font-display text-[clamp(2.5rem,8vw,6.5rem)] leading-[0.95] tracking-[-0.02em] text-white">
+              MILESTONE <span className="text-gradient">ENERGYM</span>
             </h1>
           </motion.div>
 
@@ -223,7 +232,7 @@ export default function HeroSection() {
 
           {/* Call */}
           <a
-            href="tel:+918875305442"
+            href={`tel:${settings?.contactPhone?.replace(/[^0-9+]/g, '') || '+918875305442'}`}
             className="w-full sm:w-auto"
             id="hero-call"
           >
@@ -241,7 +250,7 @@ export default function HeroSection() {
           transition={{ delay: 1 }}
         >
           <a
-            href="https://wa.me/918875305442?text=Hi!%20I%27d%20like%20to%20know%20more%20about%20Milestone%20Energym."
+            href={`https://wa.me/${settings?.contactPhone?.replace(/[^0-9]/g, '') || '918875305442'}?text=Hi!%20I%27d%20like%20to%20know%20more%20about%20Milestone%20Energym.`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors group"
@@ -250,7 +259,7 @@ export default function HeroSection() {
             <div className="w-7 h-7 rounded-full bg-[#25D366]/20 flex items-center justify-center group-hover:bg-[#25D366]/30 transition-colors">
               <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
             </div>
-            <span>Chat on WhatsApp: +91 88753 05442</span>
+            <span>Chat on WhatsApp: {settings?.contactPhone || '+91 88753 05442'}</span>
           </a>
         </motion.div>
       </div>

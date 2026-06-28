@@ -92,6 +92,11 @@ const UserSchema = new Schema<IUser>(
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
     },
+    passwordHistory: {
+      type: [String],
+      select: false,
+      default: []
+    },
     role: {
       type: String,
       enum: ['super_admin', 'admin', 'manager', 'receptionist', 'trainer', 'nutritionist', 'accountant', 'cleaner', 'member'],
@@ -103,7 +108,6 @@ const UserSchema = new Schema<IUser>(
     isPhoneVerified: { type: Boolean, default: false },
     googleId: { type: String, sparse: true },
     refreshToken: { type: String, select: false },
-    passwordHistory: { type: [String], select: false, default: [] },
     twoFactorEnabled: { type: Boolean, default: false },
     twoFactorSecret: { type: String, select: false },
     loginAttempts: { type: Number, default: 0 },
@@ -135,8 +139,9 @@ UserSchema.pre('save', async function () {
   if (!this.isModified('password') || !this.password) return
 
   // Store old password in history (max 5)
-  if (this.password) {
-    this.passwordHistory = [this.password, ...this.passwordHistory].slice(0, 5)
+  if (this.isModified('password')) {
+    const pwdHistory = this.passwordHistory || []
+    this.passwordHistory = [...pwdHistory.slice(0, 4), this.password] // Keep last 5 passwords
   }
 
   const salt = await bcrypt.genSalt(12)

@@ -6,13 +6,14 @@ import {
   MapPin,
   Phone,
   Mail,
-  Clock,
+  ChevronRight,
+  CheckCircle2,
   ArrowRight,
-  Dumbbell,
-  Shield,
   Star,
-  MessageCircle,
+  Shield,
+  Clock,
 } from 'lucide-react'
+import { getGymSettings } from '@/app/actions/settings'
 
 // Social icon SVG components (since lucide doesn't include brand icons)
 const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -30,12 +31,6 @@ const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
   </svg>
 )
-const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" {...props} fill="currentColor" aria-hidden="true">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-  </svg>
-)
-
 
 const footerLinks = {
   quickLinks: [
@@ -61,21 +56,22 @@ const footerLinks = {
     { label: 'Cookie Policy', href: '/cookie-policy' },
   ],
   social: [
-    { label: 'Instagram', icon: InstagramIcon, href: 'https://instagram.com/milestoneenergym', color: '#E1306C' },
-    { label: 'Facebook', icon: FacebookIcon, href: 'https://facebook.com/milestoneenergym', color: '#1877F2' },
-    { label: 'YouTube', icon: YoutubeIcon, href: 'https://youtube.com/@milestoneenergym', color: '#FF0000' },
-    { label: 'Twitter / X', icon: TwitterIcon, href: 'https://twitter.com/milestoneenergym', color: '#1DA1F2' },
+    { label: 'Instagram', icon: InstagramIcon, href: 'https://www.instagram.com/milestonenergym?igsh=MWU0cXI3dzdqOGVvdQ==', color: '#E1306C' },
+    { label: 'Facebook', icon: FacebookIcon, href: 'https://www.facebook.com/share/17wKrcgpUk/', color: '#1877F2' },
+    { label: 'YouTube', icon: YoutubeIcon, href: 'https://youtube.com/@milestoneenergym?si=UBXz4UYjg9I8T-X7', color: '#FF0000' },
   ],
 }
 
-const workingHours = [
-  { day: 'Monday – Friday', time: '5:00 AM – 11:00 PM' },
-  { day: 'Saturday', time: '5:00 AM – 11:00 PM' },
-  { day: 'Sunday', time: '6:00 AM – 10:00 PM' },
-]
-
-export default function Footer() {
+export default async function Footer() {
+  const settings = await getGymSettings()
   const currentYear = new Date().getFullYear()
+
+  let parsedHours = []
+  try {
+    parsedHours = JSON.parse(settings?.businessHours || '[]')
+  } catch(e) {
+    parsedHours = []
+  }
 
   return (
     <footer className="relative bg-[#080808] border-t border-white/8 overflow-hidden">
@@ -105,7 +101,7 @@ export default function Footer() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <a
-                href="https://wa.me/918875305442?text=Hi%20Milestone%20Energym!%20I%27m%20interested%20in%20joining%20the%20gym."
+                href={`https://wa.me/${settings?.contactPhone?.replace(/[^0-9]/g, '') || '918875305442'}?text=Hi%20Milestone%20Energym!%20I%27m%20interested%20in%20joining%20the%20gym.`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-gold py-3 px-6"
@@ -199,34 +195,30 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-sm mb-5 tracking-wide uppercase">Contact</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-brand-blue-300 flex-shrink-0 mt-0.5" />
-                <span className="text-white/50 text-sm">
-                  Your Gym Address,<br />City, State – 000000
-                </span>
-              </li>
-              <li>
-                <a href="tel:+918875305442" className="flex items-center gap-3 text-white/50 hover:text-white text-sm transition-colors" id="footer-phone">
-                  <Phone className="w-4 h-4 text-brand-blue-300 flex-shrink-0" />
-                  +91 88753 05442
+              <li className="flex flex-col gap-4">
+                <a href={settings?.googleMapsUrl || '#'} className="text-white/70 hover:text-white hover:-translate-y-0.5 transition-all flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span className="text-sm">{settings?.address}</span>
+                </a>
+                <a href={`tel:${settings?.contactPhone}`} className="text-white/70 hover:text-white hover:-translate-y-0.5 transition-all flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span className="text-sm">{settings?.contactPhone}</span>
+                </a>
+                <a href={`mailto:${settings?.contactEmail}`} className="text-white/70 hover:text-white hover:-translate-y-0.5 transition-all flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span className="text-sm">{settings?.contactEmail}</span>
                 </a>
               </li>
-              <li>
-                <a href="mailto:info@milestoneenergym.com" className="flex items-center gap-3 text-white/50 hover:text-white text-sm transition-colors" id="footer-email">
-                  <Mail className="w-4 h-4 text-brand-blue-300 flex-shrink-0" />
-                  info@milestoneenergym.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
+              <li className="flex items-start gap-3 pt-2">
                 <Clock className="w-4 h-4 text-brand-blue-300 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  {workingHours.map(({ day, time }) => (
-                    <div key={day}>
-                      <div className="text-white/30 text-xs">{day}</div>
-                      <div className="text-white/60 text-sm">{time}</div>
-                    </div>
+                <ul className="space-y-3 w-full">
+                  {parsedHours.map((hours: any, index: number) => (
+                    <li key={index} className="flex justify-between items-center text-white/70 text-sm">
+                      <span>{hours.day}</span>
+                      <span className="text-white font-medium">{hours.time}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </li>
             </ul>
           </div>

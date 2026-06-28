@@ -1,9 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Check, Zap, ArrowRight, Tag } from 'lucide-react'
+import { getPlans } from '@/app/actions/plans'
 
 const plans = [
   {
@@ -52,6 +53,36 @@ export default function MembershipPreview() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
+  const [dbPlans, setDbPlans] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      const data = await getPlans()
+      setDbPlans(data.filter((p: any) => p.isActive))
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const displayPlans = dbPlans.length > 0 ? dbPlans.slice(0, 4).map((plan, idx) => {
+    const staticPlan = plans[idx % plans.length]
+    let featuresArray = staticPlan.features
+    if (plan.features) {
+      featuresArray = plan.features.split('\\n').map((f: string) => f.trim()).filter(Boolean)
+    }
+    
+    return {
+      id: plan.id,
+      name: plan.name,
+      duration: `${Math.round(plan.durationInDays / 30)} Month${Math.round(plan.durationInDays / 30) > 1 ? 's' : ''}`,
+      price: plan.price,
+      originalPrice: plan.originalPrice || staticPlan.originalPrice,
+      popular: plan.popular !== undefined ? plan.popular : staticPlan.popular,
+      color: plan.colorTheme && plan.colorTheme !== 'default' ? plan.colorTheme : staticPlan.color,
+      features: featuresArray
+    }
+  }) : plans
 
   return (
     <section
@@ -96,7 +127,9 @@ export default function MembershipPreview() {
 
         {/* Plans Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-          {plans.map((plan, index) => (
+          {loading ? (
+             <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-20 text-white/50 animate-pulse">Loading Power Plans...</div>
+          ) : displayPlans.map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ y: 40, opacity: 0 }}

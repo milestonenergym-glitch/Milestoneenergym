@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import { User, IUser } from '../models/User'
+import User, { IUser } from '../models/User'
 import crypto from 'crypto'
 
 /**
@@ -10,11 +10,11 @@ const generateTokens = (user: IUser) => {
   const payload = { id: user._id, role: user.role, branch: user.branch }
   
   const accessToken = jwt.sign(payload, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m'
+    expiresIn: (process.env.JWT_EXPIRES_IN || '15m') as any
   })
   
   const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET as string, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
+    expiresIn: (process.env.REFRESH_TOKEN_EXPIRES_IN || '7d') as any
   })
 
   return { accessToken, refreshToken }
@@ -37,7 +37,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Find by email or phone
     const user = await User.findOne({
       $or: [{ email: identifier.toLowerCase() }, { phone: identifier }]
-    }).select('+password +accountLockedUntil +failedLoginAttempts')
+    }).select('+password +lockUntil +loginAttempts')
 
     if (!user) {
       res.status(401).json({ success: false, error: 'Invalid credentials' })
@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check lockout
-    if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
+    if (user.lockUntil && user.lockUntil > new Date()) {
       res.status(403).json({ success: false, error: `Account locked. Try again later.` })
       return
     }
@@ -55,9 +55,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     
     if (!isMatch) {
       // Handle failed attempts
-      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1
-      if (user.failedLoginAttempts >= 5) {
-        user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000) // 15 mins lock
+      user.loginAttempts = (user.loginAttempts || 0) + 1
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 15 * 60 * 1000) // 15 mins lock
       }
       await user.save()
       
@@ -66,9 +66,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Reset failed attempts on success
-    user.failedLoginAttempts = 0
-    user.accountLockedUntil = undefined
-    user.lastLogin = new Date()
+    user.loginAttempts = 0
+    user.lockUntil = undefined
     
     const { accessToken, refreshToken } = generateTokens(user)
     user.refreshToken = refreshToken
@@ -87,7 +86,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       data: {
         user: {
           id: user._id,
-          name: user.firstName + ' ' + user.lastName,
+          name: user.name,
           email: user.email,
           phone: user.phone,
           role: user.role,
@@ -123,7 +122,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       return
     }
 
-    if (user.status !== 'active') {
+    if (user.isActive !== true) {
       res.status(403).json({ success: false, error: 'Account inactive' })
       return
     }
