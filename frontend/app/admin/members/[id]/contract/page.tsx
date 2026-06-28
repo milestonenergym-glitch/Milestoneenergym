@@ -115,7 +115,15 @@ export default async function MemberContractPage({ params }: { params: Promise<{
               </div>
             </div>
           ) : (
-            <p className="px-3 italic text-gray-500">No active membership plan recorded.</p>
+            <div className="px-3">
+              <p className="italic text-gray-500 mb-2">No active membership plan recorded yet.</p>
+              {profile.requestedDuration && (
+                <div>
+                  <span className="text-xs text-gray-500 uppercase font-semibold">Requested Duration</span>
+                  <p className="font-bold text-lg border-b border-gray-300 pb-1">{profile.requestedDuration}</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
 

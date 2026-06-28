@@ -192,6 +192,11 @@ export default function MembersPage() {
                             {new Date(member.memberships[0].endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                           </div>
                         </>
+                      ) : member.profile?.requestedDuration ? (
+                        <>
+                          <div className="font-medium text-brand-gold">{member.profile.requestedDuration}</div>
+                          <div className="text-xs text-zinc-500 mt-1 italic">Requested (Pending)</div>
+                        </>
                       ) : (
                         <span className="text-zinc-600 italic">No Plan</span>
                       )}

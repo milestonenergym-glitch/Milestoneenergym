@@ -16,9 +16,6 @@ export default function RegistrationForm({ token, plans }: { token: string, plan
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
     
-    const planId = formData.get('planId') as string
-    const selectedPlan = plans.find(p => p.id === planId)
-    
     const data = {
       name: formData.get('name'),
       email: formData.get('email'),
@@ -29,9 +26,7 @@ export default function RegistrationForm({ token, plans }: { token: string, plan
       address: formData.get('address'),
       emergencyContact: formData.get('emergencyContact'),
       emergencyContactPhone: formData.get('emergencyContactPhone'),
-      planId,
-      durationInDays: selectedPlan?.durationInDays || 0,
-      amountPaid: selectedPlan?.price || 0,
+      requestedDuration: formData.get('requestedDuration') as string,
     }
 
     const res = await createMember(data)
@@ -113,23 +108,18 @@ export default function RegistrationForm({ token, plans }: { token: string, plan
         </h3>
         <div className="space-y-4">
           <label className="block text-sm font-medium text-zinc-400 mb-1">Select your Package *</label>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {plans.map(p => (
-              <label key={p.id} className="relative flex cursor-pointer rounded-xl bg-zinc-950 border border-white/10 p-4 hover:border-brand-gold transition-colors has-[:checked]:border-brand-gold has-[:checked]:bg-brand-gold/5">
-                <input type="radio" name="planId" value={p.id} required className="peer sr-only" />
-                <div className="flex w-full flex-col">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-white">{p.name}</span>
-                    <span className="font-bold text-brand-gold">₹{p.price}</span>
-                  </div>
-                  <span className="text-sm text-zinc-500 mt-1">{p.durationInDays} days</span>
-                </div>
-                <div className="absolute right-4 top-4 hidden w-4 h-4 rounded-full border-2 border-brand-gold bg-brand-gold peer-checked:block">
-                  <div className="w-full h-full bg-brand-gold border-2 border-zinc-900 rounded-full"></div>
-                </div>
-              </label>
+          <select 
+            name="requestedDuration" 
+            required 
+            className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors appearance-none"
+          >
+            <option value="">Select Package</option>
+            {[...Array(12)].map((_, i) => (
+              <option key={i} value={`${i + 1} Month${i === 0 ? '' : 's'}`}>
+                {i + 1} Month{i === 0 ? '' : 's'}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
       

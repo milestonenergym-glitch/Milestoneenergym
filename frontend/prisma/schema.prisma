@@ -228,6 +228,7 @@ model MemberProfile {
   emergencyContactPhone String?
   bloodGroup        String?
   medicalConditions String?
+  requestedDuration String?
   aadharNumber      String?
   height            String?
   weight            String?
