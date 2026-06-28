@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getMembers, createMember } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
-import { UserPlus, Search, MoreVertical, Phone, Calendar, Activity, X } from 'lucide-react'
+import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 export default function MembersPage() {
   const [members, setMembers] = useState<any[]>([])
@@ -174,7 +175,15 @@ export default function MembersPage() {
                     <td className="px-6 py-4">
                       {getMembershipStatus(member)}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                      <Link 
+                        href={`/admin/members/${member.id}/contract`}
+                        target="_blank"
+                        className="text-zinc-500 hover:text-brand-gold transition-colors p-2 rounded-lg hover:bg-white/5"
+                        title="Print Contract"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </Link>
                       <button className="text-zinc-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
                         <MoreVertical className="w-4 h-4" />
                       </button>

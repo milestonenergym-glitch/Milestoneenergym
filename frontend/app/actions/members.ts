@@ -26,6 +26,26 @@ export async function getMembers() {
   }
 }
 
+export async function getMemberById(id: string) {
+  try {
+    const member = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        profile: true,
+        memberships: {
+          include: { plan: true },
+          orderBy: { endDate: 'desc' },
+          take: 1
+        }
+      }
+    })
+    return member
+  } catch (error) {
+    console.error('Failed to fetch member by ID:', error)
+    return null
+  }
+}
+
 export async function createMember(data: any) {
   try {
     const { name, email, phone, planId, durationInDays, amountPaid, ...profileData } = data
