@@ -19,7 +19,8 @@ import {
   Bell,
   Search,
   ChevronDown,
-  Tag
+  Tag,
+  Megaphone
 } from 'lucide-react'
 
 import { useSession, signOut } from 'next-auth/react'
@@ -34,6 +35,7 @@ const SIDEBAR_LINKS = [
   { icon: Dumbbell, label: 'Classes & Trainers', href: '/admin/classes' },
   { icon: CalendarDays, label: 'Attendance', href: '/admin/attendance' },
   { icon: CreditCard, label: 'Payments', href: '/admin/payments' },
+  { icon: Megaphone, label: 'Marketing Popup', href: '/admin/marketing-popup' },
   { icon: Settings, label: 'Settings', href: '/admin/settings' },
 ]
 

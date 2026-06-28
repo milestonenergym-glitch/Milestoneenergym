@@ -8,6 +8,7 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import MetaPixel from '@/components/analytics/MetaPixel'
 import CookieBanner from '@/components/shared/CookieBanner'
 import LeadCapturePopup from '@/components/shared/LeadCapturePopup'
+import OccasionPopup from '@/components/shared/OccasionPopup'
 import { Providers } from '@/components/Providers'
 
 /* ─── Fonts ─── */
@@ -198,6 +199,7 @@ export default function RootLayout({
             <Providers>
               {children}
               <LeadCapturePopup />
+              <OccasionPopup />
             </Providers>
             <Toaster
               position="top-right"
