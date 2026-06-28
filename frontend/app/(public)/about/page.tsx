@@ -57,7 +57,24 @@ const trainers = [
   }
 ]
 
+import { useState, useEffect } from 'react'
+
 export default function AboutPage() {
+  const [dbTrainers, setDbTrainers] = useState<any[]>([])
+
+  useEffect(() => {
+    import('@/app/actions/trainers').then(({ getTrainerProfiles }) => {
+      getTrainerProfiles().then(data => {
+        setDbTrainers(data)
+      })
+    })
+  }, [])
+
+  const displayTrainers = dbTrainers.length > 0 ? dbTrainers.map(t => ({
+    name: t.name,
+    role: t.specialization || 'Milestone Trainer',
+    image: t.imageUrl || 'https://i.pravatar.cc/300?img=11'
+  })) : trainers
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -206,7 +223,7 @@ export default function AboutPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trainers.map((trainer, index) => (
+            {displayTrainers.slice(0, 4).map((trainer, index) => (
               <motion.div
                 key={trainer.name}
                 initial={{ opacity: 0, y: 20 }}
