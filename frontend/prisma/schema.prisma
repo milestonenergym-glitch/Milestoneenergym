@@ -256,15 +256,19 @@ model TrainerProfile {
 
 model GymClass {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  description     String?
-  capacity        Int      @default(20)
-  scheduleTime    String   // e.g., "Mon-Wed-Fri 7:00 AM"
+  name        String
+  description String?
+  scheduleTime String? // Optional legacy field
+  day         String?  // e.g., 'Mon', 'Tue'
+  time        String?  // e.g., '06:00 AM'
+  duration    String?  // e.g., '60 min'
+  classType   String?  // e.g., 'Yoga', 'CrossFit'
+  capacity    Int      @default(20)
   
-  trainerId String? @db.ObjectId
-  trainer         User?    @relation(fields: [trainerId], references: [id])
+  trainerId   String?  @db.ObjectId
+  trainer     User?    @relation(fields: [trainerId], references: [id])
   
-  isActive        Boolean  @default(true)
+  isActive    Boolean  @default(true)
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

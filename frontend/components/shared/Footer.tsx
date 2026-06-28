@@ -56,9 +56,9 @@ const footerLinks = {
     { label: 'Cookie Policy', href: '/cookie-policy' },
   ],
   social: [
-    { label: 'Instagram', icon: InstagramIcon, href: 'https://www.instagram.com/milestonenergym?igsh=MWU0cXI3dzdqOGVvdQ==', color: '#E1306C' },
-    { label: 'Facebook', icon: FacebookIcon, href: 'https://www.facebook.com/share/17wKrcgpUk/', color: '#1877F2' },
-    { label: 'YouTube', icon: YoutubeIcon, href: 'https://youtube.com/@milestoneenergym?si=UBXz4UYjg9I8T-X7', color: '#FF0000' },
+    { label: 'Instagram', icon: InstagramIcon, key: 'instagramUrl', color: '#E1306C' },
+    { label: 'Facebook', icon: FacebookIcon, key: 'facebookUrl', color: '#1877F2' },
+    { label: 'YouTube', icon: YoutubeIcon, key: 'youtubeUrl', color: '#FF0000' },
   ],
 }
 
@@ -141,19 +141,23 @@ export default async function Footer() {
 
             {/* Social Links */}
             <div className="flex items-center gap-3">
-              {footerLinks.social.map(({ label, icon: Icon, href, color }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-lg glass flex items-center justify-center text-white/50 hover:text-white transition-all hover:-translate-y-0.5"
-                  aria-label={`Follow on ${label}`}
-                  id={`footer-social-${label.toLowerCase().replace(/[\s/]+/g, '-')}`}
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+              {footerLinks.social.map(({ label, icon: Icon, key, color }) => {
+                const href = settings?.[key as keyof typeof settings] as string
+                if (!href) return null
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg glass flex items-center justify-center text-white/50 hover:text-white transition-all hover:-translate-y-0.5"
+                    aria-label={`Follow on ${label}`}
+                    id={`footer-social-${label.toLowerCase().replace(/[\s/]+/g, '-')}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                )
+              })}
             </div>
           </div>
 

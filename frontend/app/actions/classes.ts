@@ -26,12 +26,18 @@ export async function createClass(data: {
   name: string
   description?: string
   capacity: number
-  scheduleTime: string
+  scheduleTime?: string
+  day?: string
+  time?: string
+  duration?: string
+  classType?: string
   trainerId?: string
 }) {
   try {
     const gymClass = await prisma.gymClass.create({ data })
     revalidatePath('/admin/classes')
+    revalidatePath('/')
+    revalidatePath('/classes')
     return { success: true, gymClass }
   } catch (error) {
     console.error('Failed to create class:', error)

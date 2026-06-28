@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
 import { Clock, ArrowRight, Filter } from 'lucide-react'
@@ -24,8 +24,31 @@ export default function ClassSchedule() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [activeDay, setActiveDay] = useState('Mon')
+  const [dbClasses, setDbClasses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filtered = classes.filter(c => c.day === activeDay)
+  useEffect(() => {
+    import('@/app/actions/classes').then(({ getClasses }) => {
+      getClasses().then(data => {
+        setDbClasses(data)
+        setLoading(false)
+      })
+    })
+  }, [])
+
+  const displayClasses = dbClasses.length > 0 ? dbClasses.map(c => ({
+    id: c.id,
+    name: c.name,
+    trainer: c.trainer?.name || 'Milestone Trainer',
+    time: c.time || c.scheduleTime,
+    duration: c.duration || '60 min',
+    day: c.day || 'Mon',
+    type: c.classType || 'General',
+    spots: c.capacity, // Using capacity for spots for now
+    color: '#0F52BA' // Default color since it's not in DB yet
+  })) : classes
+
+  const filtered = displayClasses.filter(c => c.day === activeDay)
 
   return (
     <section
@@ -78,7 +101,11 @@ export default function ClassSchedule() {
 
         {/* Classes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[200px]">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="col-span-3 flex items-center justify-center py-16 text-white/50 animate-pulse">
+              Loading schedule...
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="col-span-3 flex items-center justify-center py-16 text-white/30">
               <div className="text-center">
                 <Filter className="w-8 h-8 mx-auto mb-3 opacity-50" />

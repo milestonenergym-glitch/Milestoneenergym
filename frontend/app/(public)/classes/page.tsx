@@ -73,7 +73,9 @@ export default function ClassesPage() {
       title: cls.name,
       description: cls.description || staticProgram.description,
       capacity: `${cls.capacity} Members`,
-      duration: cls.scheduleTime
+      duration: cls.duration || '60 Min',
+      time: cls.time,
+      day: cls.day
     }
   }) : programs
 

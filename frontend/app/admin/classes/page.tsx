@@ -37,7 +37,10 @@ export default function ClassesPage() {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       capacity: Number(formData.get('capacity')),
-      scheduleTime: formData.get('scheduleTime') as string,
+      day: formData.get('day') as string,
+      time: formData.get('time') as string,
+      duration: formData.get('duration') as string,
+      classType: formData.get('classType') as string,
       trainerId: formData.get('trainerId') as string || undefined
     }
 
@@ -100,20 +103,22 @@ export default function ClassesPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-zinc-900 border border-white/5 rounded-2xl p-6 flex flex-col"
               >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-bold text-white">{gymClass.name}</h3>
-                  <button onClick={() => handleDelete(gymClass.id)} className="text-zinc-500 hover:text-red-500 transition-colors p-1">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="font-bold text-lg text-white group-hover:text-brand-gold transition-colors">{gymClass.name}</h3>
+                    <p className="text-zinc-400 text-sm mt-1">{gymClass.classType || 'General'} Class</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleDelete(gymClass.id)} className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                
-                {gymClass.description && (
-                  <p className="text-zinc-400 text-sm mb-6 flex-1">{gymClass.description}</p>
-                )}
 
-                <div className="space-y-3 mt-auto pt-6 border-t border-white/5">
-                  <div className="flex items-center gap-3 text-sm text-zinc-300">
-                    <Clock className="w-4 h-4 text-brand-gold" /> {gymClass.scheduleTime}
+                <div className="space-y-3 mt-4 pt-4 border-t border-white/5">
+                  <div className="flex items-center gap-3 text-zinc-300 text-sm">
+                    <Clock className="w-4 h-4 text-brand-gold shrink-0" />
+                    <span>{gymClass.day ? `${gymClass.day} at ${gymClass.time} (${gymClass.duration})` : gymClass.scheduleTime}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-zinc-300">
                     <Users className="w-4 h-4 text-brand-gold" /> Max Capacity: {gymClass.capacity} Members
@@ -157,9 +162,30 @@ export default function ClassesPage() {
                   </select>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-1">Schedule Timing</label>
-                <input type="text" name="scheduleTime" required placeholder="e.g., Mon-Wed-Fri 7:00 AM" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Day</label>
+                  <select name="day" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Time</label>
+                  <input type="text" name="time" placeholder="e.g. 06:00 AM" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Duration</label>
+                  <input type="text" name="duration" placeholder="e.g. 60 min" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Class Type</label>
+                  <input type="text" name="classType" placeholder="e.g. Yoga, CrossFit" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-zinc-400 mb-1">Description (Optional)</label>
