@@ -57,6 +57,7 @@ model User {
   trainerProfile TrainerProfile?
   classesTaught  GymClass[]
   attendanceRecords Attendance[]
+  blogPosts      BlogPost[]
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -94,6 +95,10 @@ model GymSettings {
   customPopupHtml String?
   customPopupActive Boolean @default(false)
 
+  // Analytics
+  googleAnalyticsId String?
+  metaPixelId       String?
+
   updatedAt       DateTime @updatedAt
 }
 
@@ -129,6 +134,22 @@ model GalleryImage {
   title       String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+}
+
+model BlogPost {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+  imageUrl    String?
+  isPublished Boolean  @default(false)
+  
+  authorId    String   @db.ObjectId
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // ==========================================

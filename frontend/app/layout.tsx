@@ -10,6 +10,7 @@ import CookieBanner from '@/components/shared/CookieBanner'
 import LeadCapturePopup from '@/components/shared/LeadCapturePopup'
 import OccasionPopup from '@/components/shared/OccasionPopup'
 import { Providers } from '@/components/Providers'
+import { getGymSettings } from '@/app/actions/settings'
 
 /* ─── Fonts ─── */
 const inter = Inter({
@@ -162,11 +163,15 @@ const schemaOrgData = {
   ],
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const settings = await getGymSettings()
+  const gaId = settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID || ''
+  const pixelId = settings?.metaPixelId || process.env.NEXT_PUBLIC_META_PIXEL_ID || ''
+
   return (
     <html
       lang="en"
@@ -185,8 +190,8 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-white dark:bg-[#0A0A0A] text-black dark:text-white transition-colors duration-300">
         {/* Analytics */}
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
-        <MetaPixel pixelId={process.env.NEXT_PUBLIC_META_PIXEL_ID || ''} />
+        <GoogleAnalytics gaId={gaId} />
+        <MetaPixel pixelId={pixelId} />
 
         {/* App Providers */}
         <ThemeProvider

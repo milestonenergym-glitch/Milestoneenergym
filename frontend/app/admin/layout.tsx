@@ -23,7 +23,8 @@ import {
   Tag,
   Megaphone,
   UserCheck,
-  ImageIcon as ImageIcon
+  ImageIcon as ImageIcon,
+  FileText
 } from 'lucide-react'
 
 import { useSession, signOut } from 'next-auth/react'
@@ -41,6 +42,7 @@ const SIDEBAR_LINKS = [
   { label: 'Trainers', href: '/admin/trainers', icon: Users },
   { label: 'Hero Banners', href: '/admin/hero', icon: ImageIcon },
   { label: 'Testimonials', href: '/admin/testimonials', icon: MessageSquare },
+  { label: 'Blog', href: '/admin/blog', icon: FileText },
   { label: 'Marketing Popup', href: '/admin/marketing-popup', icon: Megaphone },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]

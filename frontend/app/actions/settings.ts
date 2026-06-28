@@ -28,7 +28,20 @@ export async function getGymSettings() {
   }
 }
 
-export async function updateGymSettings(data: any) {
+export async function updateGymSettings(data: {
+  gymName?: string
+  contactPhone?: string
+  contactEmail?: string
+  address?: string
+  facebookUrl?: string
+  instagramUrl?: string
+  youtubeUrl?: string
+  businessHours?: string
+  googleAnalyticsId?: string
+  metaPixelId?: string
+  customPopupHtml?: string
+  customPopupActive?: boolean
+}) {
   try {
     const settings = await prisma.gymSettings.findFirst()
     if (!settings) return { success: false }

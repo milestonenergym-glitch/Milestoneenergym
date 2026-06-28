@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getGymSettings, updateGymSettings } from '@/app/actions/settings'
 import { toast } from 'sonner'
-import { Save, MapPin, Phone, Mail, Clock, Globe } from 'lucide-react'
+import { Save, MapPin, Phone, Mail, Clock, Globe, Activity } from 'lucide-react'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null)
@@ -32,6 +32,8 @@ export default function SettingsPage() {
       facebookUrl: formData.get('facebookUrl') as string,
       instagramUrl: formData.get('instagramUrl') as string,
       youtubeUrl: formData.get('youtubeUrl') as string,
+      googleAnalyticsId: formData.get('googleAnalyticsId') as string,
+      metaPixelId: formData.get('metaPixelId') as string,
     }
 
     const res = await updateGymSettings(data)
@@ -93,6 +95,21 @@ export default function SettingsPage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-zinc-400 mb-1">YouTube URL</label>
               <input type="url" name="youtubeUrl" defaultValue={settings?.youtubeUrl} className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics & Tracking */}
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Activity className="w-5 h-5 text-brand-gold" /> Analytics & Tracking</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Google Analytics ID</label>
+              <input type="text" name="googleAnalyticsId" defaultValue={settings?.googleAnalyticsId} placeholder="e.g. G-XXXXXXXXXX" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-zinc-400 mb-1">Meta Pixel ID</label>
+              <input type="text" name="metaPixelId" defaultValue={settings?.metaPixelId} placeholder="e.g. 123456789012345" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-gold" />
             </div>
           </div>
         </div>
