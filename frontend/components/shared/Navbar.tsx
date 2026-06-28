@@ -94,18 +94,14 @@ export default function Navbar() {
             className="flex items-center gap-3 flex-shrink-0"
             aria-label="Milestone Energym — Home"
           >
-            <div className="relative w-10 h-10 md:w-12 md:h-12">
+            <div className="relative w-12 h-12 md:w-16 md:h-16">
               <Image
-                src="/logo.png"
+                src="/logo.jpg"
                 alt="Milestone Energym Logo"
                 fill
                 className="object-contain"
                 priority
               />
-            </div>
-            <div className="hidden sm:block">
-              <div className="text-white font-bold text-sm leading-none tracking-wide">MILESTONE</div>
-              <div className="text-brand-gold text-xs font-medium tracking-[0.2em] leading-none mt-0.5">ENERGYM</div>
             </div>
           </Link>
 
@@ -256,10 +252,9 @@ export default function Navbar() {
             >
               {/* Mobile Header */}
               <div className="flex items-center justify-between p-5 border-b border-white/10">
-                <div>
-                  <div className="text-white font-bold text-base">MILESTONE</div>
-                  <div className="text-brand-gold text-xs font-medium tracking-[0.2em]">ENERGYM</div>
-                </div>
+                  <div className="relative w-16 h-16">
+                    <Image src="/logo.jpg" alt="Milestone Energym" fill className="object-contain" />
+                  </div>
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10"

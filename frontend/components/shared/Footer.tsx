@@ -124,12 +124,8 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-6" aria-label="Milestone Energym Home">
-              <div className="relative w-12 h-12">
-                <Image src="/logo.png" alt="Milestone Energym" fill className="object-contain" />
-              </div>
-              <div>
-                <div className="text-white font-bold text-lg leading-none">MILESTONE</div>
-                <div className="text-brand-gold text-sm font-medium tracking-[0.2em] leading-none mt-1">ENERGYM</div>
+              <div className="relative w-20 h-20">
+                <Image src="/logo.jpg" alt="Milestone Energym" fill className="object-contain" />
               </div>
             </Link>
 
