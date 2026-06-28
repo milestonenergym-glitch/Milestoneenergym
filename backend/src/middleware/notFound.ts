@@ -1,9 +1,0 @@
-import { Request, Response } from 'express'
-
-export const notFound = (req: Request, res: Response): void => {
-  res.status(404).json({
-    success: false,
-    message: `Cannot ${req.method} ${req.originalUrl}`,
-    hint: 'Check the API documentation for available endpoints.',
-  })
-}
