@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getMembers, createMember } from '@/app/actions/members'
+import { getMembers, createMember, updateMemberProfile, assignMembershipToMember } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
 import { generateRegistrationLink } from '@/app/actions/registration-links'
 import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2 } from 'lucide-react'
@@ -18,6 +18,29 @@ export default function MembersPage() {
   const [generatedLink, setGeneratedLink] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingMember, setEditingMember] = useState<any>(null)
+  
+  // Plan assignment state
+  const [assignPlanId, setAssignPlanId] = useState('')
+  const [assignStartDate, setAssignStartDate] = useState(new Date().toISOString().split('T')[0])
+  const [assignEndDate, setAssignEndDate] = useState('')
+  const [assignActualAmount, setAssignActualAmount] = useState('')
+  const [assignPdfAmount, setAssignPdfAmount] = useState('')
+  const [assignPaymentMode, setAssignPaymentMode] = useState('CASH')
+
+  // Auto-calculate end date when plan or start date changes
+  useEffect(() => {
+    if (assignPlanId && assignStartDate) {
+      const plan = plans.find(p => p.id === assignPlanId)
+      if (plan) {
+        const start = new Date(assignStartDate)
+        const end = new Date(start)
+        end.setDate(end.getDate() + plan.durationInDays)
+        setAssignEndDate(end.toISOString().split('T')[0])
+      }
+    }
+  }, [assignPlanId, assignStartDate, plans])
 
   useEffect(() => {
     fetchData()
@@ -90,6 +113,64 @@ export default function MembersPage() {
     m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     m.profile?.phone?.includes(searchTerm)
   )
+
+  const openEditModal = (member: any) => {
+    setEditingMember(member)
+    setIsEditModalOpen(true)
+    // Reset plan assignment fields
+    setAssignPlanId('')
+    setAssignActualAmount('')
+    setAssignPdfAmount('')
+    setAssignPaymentMode('CASH')
+  }
+
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!editingMember) return
+    setIsSubmitting(true)
+    const formData = new FormData(e.currentTarget)
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      gender: formData.get('gender'),
+      dateOfBirth: formData.get('dateOfBirth') ? new Date(formData.get('dateOfBirth') as string) : undefined,
+      bloodGroup: formData.get('bloodGroup'),
+      emergencyContact: formData.get('emergencyContact'),
+      address: formData.get('address'),
+    }
+    const res = await updateMemberProfile(editingMember.id, data)
+    if (res.success) {
+      toast.success('Profile updated successfully!')
+      fetchData()
+    } else {
+      toast.error(res.error || 'Failed to update profile')
+    }
+    setIsSubmitting(false)
+  }
+
+  const handleAssignPlan = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!editingMember || !assignPlanId) return
+    setIsSubmitting(true)
+    const data = {
+      planId: assignPlanId,
+      startDate: assignStartDate,
+      endDate: assignEndDate,
+      amountPaid: assignActualAmount,
+      pdfAmount: assignPdfAmount,
+      paymentMode: assignPaymentMode,
+    }
+    const res = await assignMembershipToMember(editingMember.id, data)
+    if (res.success) {
+      toast.success('Plan assigned successfully!')
+      setIsEditModalOpen(false)
+      fetchData()
+    } else {
+      toast.error(res.error || 'Failed to assign plan')
+    }
+    setIsSubmitting(false)
+  }
 
   const getMembershipStatus = (member: any) => {
     if (!member.memberships || member.memberships.length === 0) {
@@ -216,8 +297,12 @@ export default function MembersPage() {
                       >
                         <Printer className="w-4 h-4" />
                       </Link>
-                      <button className="text-zinc-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
-                        <MoreVertical className="w-4 h-4" />
+                      <button 
+                        onClick={() => openEditModal(member)}
+                        className="text-zinc-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5"
+                        title="Edit Member"
+                      >
+                        <FileEdit className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -381,6 +466,176 @@ export default function MembersPage() {
                 </div>
               </form>
             )}
+          </motion.div>
+        </div>
+      )}
+      {/* Edit Member Modal */}
+      {isEditModalOpen && editingMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-4xl my-8 relative flex flex-col md:flex-row max-h-[90vh] overflow-hidden"
+          >
+            <div className="p-6 border-b border-white/10 flex justify-between items-center absolute top-0 left-0 right-0 bg-zinc-900 z-10 rounded-t-2xl md:hidden">
+              <h2 className="text-xl font-bold text-white">Edit Member</h2>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Profile Edit Section */}
+            <div className="w-full md:w-1/2 p-6 md:p-8 overflow-y-auto border-r border-white/10 mt-16 md:mt-0">
+              <div className="hidden md:flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-white">Edit Profile</h2>
+              </div>
+              <form onSubmit={handleUpdateProfile} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Full Name</label>
+                  <input type="text" name="name" defaultValue={editingMember.name || ''} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Phone</label>
+                    <input type="tel" name="phone" defaultValue={editingMember.profile?.phone || ''} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Email</label>
+                    <input type="email" name="email" defaultValue={editingMember.email || ''} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Date of Birth</label>
+                    <input type="date" name="dateOfBirth" defaultValue={editingMember.profile?.dateOfBirth ? new Date(editingMember.profile.dateOfBirth).toISOString().split('T')[0] : ''} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Gender</label>
+                    <select name="gender" defaultValue={editingMember.profile?.gender || ''} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Address</label>
+                  <input type="text" name="address" defaultValue={editingMember.profile?.address || ''} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Emergency Contact</label>
+                    <input type="tel" name="emergencyContact" defaultValue={editingMember.profile?.emergencyContact || ''} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Blood Group</label>
+                    <input type="text" name="bloodGroup" defaultValue={editingMember.profile?.bloodGroup || ''} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" />
+                  </div>
+                </div>
+                <button type="submit" disabled={isSubmitting} className="w-full bg-zinc-800 text-white font-bold py-3 rounded-xl hover:bg-zinc-700 transition-colors disabled:opacity-50">
+                  {isSubmitting ? 'Saving...' : 'Save Profile Details'}
+                </button>
+              </form>
+            </div>
+
+            {/* Plan Assignment Section */}
+            <div className="w-full md:w-1/2 p-6 md:p-8 bg-black/20 overflow-y-auto">
+              <div className="hidden md:flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-white">Assign Plan</h2>
+                <button onClick={() => setIsEditModalOpen(false)} className="text-zinc-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {editingMember.memberships?.length > 0 ? (
+                <div className="bg-brand-gold/10 border border-brand-gold/20 p-4 rounded-xl">
+                  <p className="text-brand-gold mb-2 font-semibold">Active Plan Exists</p>
+                  <p className="text-sm text-zinc-400">This member already has an active plan: {editingMember.memberships[0].plan.name}.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleAssignPlan} className="space-y-4">
+                  {editingMember.profile?.requestedDuration && (
+                    <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-amber-500 text-sm">
+                      <strong>Note:</strong> Customer requested <strong>{editingMember.profile.requestedDuration}</strong> via WhatsApp registration.
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Select Plan</label>
+                    <select 
+                      value={assignPlanId} 
+                      onChange={(e) => setAssignPlanId(e.target.value)}
+                      required 
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
+                    >
+                      <option value="">Choose a plan...</option>
+                      {plans.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-zinc-400">Start Date</label>
+                      <input 
+                        type="date" 
+                        value={assignStartDate}
+                        onChange={(e) => setAssignStartDate(e.target.value)}
+                        required 
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-zinc-400">End Date</label>
+                      <input 
+                        type="date" 
+                        value={assignEndDate}
+                        readOnly
+                        className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed" 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-zinc-400">Actual Amount (₹) <span className="text-xs text-zinc-500">(For System)</span></label>
+                      <input 
+                        type="number" 
+                        value={assignActualAmount}
+                        onChange={(e) => setAssignActualAmount(e.target.value)}
+                        placeholder="e.g. 5000"
+                        required 
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-zinc-400">PDF Amount (₹) <span className="text-xs text-zinc-500">(Optional)</span></label>
+                      <input 
+                        type="number" 
+                        value={assignPdfAmount}
+                        onChange={(e) => setAssignPdfAmount(e.target.value)}
+                        placeholder="e.g. 6000"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Mode of Payment</label>
+                    <select 
+                      value={assignPaymentMode} 
+                      onChange={(e) => setAssignPaymentMode(e.target.value)}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
+                    >
+                      <option value="CASH">Cash</option>
+                      <option value="UPI">UPI</option>
+                      <option value="CARD">Card</option>
+                    </select>
+                  </div>
+                  <button type="submit" disabled={isSubmitting || !assignPlanId} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
+                    {isSubmitting ? 'Assigning...' : 'Assign Plan & Mark Paid'}
+                  </button>
+                </form>
+              )}
+            </div>
           </motion.div>
         </div>
       )}

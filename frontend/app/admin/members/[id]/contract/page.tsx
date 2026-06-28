@@ -101,7 +101,11 @@ export default async function MemberContractPage({ params }: { params: Promise<{
               </div>
               <div>
                 <span className="text-xs text-gray-500 uppercase font-semibold">Amount Paid</span>
-                <p className="font-bold text-lg border-b border-gray-300 pb-1">₹{activeMembership.amountPaid}</p>
+                <p className="font-bold text-lg border-b border-gray-300 pb-1">₹{activeMembership.pdfAmount ?? activeMembership.amountPaid}</p>
+              </div>
+              <div>
+                <span className="text-xs text-gray-500 uppercase font-semibold">Payment Mode</span>
+                <p className="font-medium text-lg border-b border-gray-300 pb-1">{activeMembership.paymentMode}</p>
               </div>
               <div>
                 <span className="text-xs text-gray-500 uppercase font-semibold">Start Date</span>

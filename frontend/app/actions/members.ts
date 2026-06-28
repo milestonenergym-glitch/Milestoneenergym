@@ -121,3 +121,76 @@ export async function createMember(data: any) {
     return { success: false, error: 'Failed to create member' }
   }
 }
+
+export async function updateMemberProfile(userId: string, data: any) {
+  try {
+    const { name, email, phone, ...profileData } = data
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        profile: {
+          update: {
+            phone,
+            ...profileData
+          }
+        }
+      }
+    })
+
+    revalidatePath('/admin/members')
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to update member profile:', error)
+    return { success: false, error: 'Failed to update member profile' }
+  }
+}
+
+export async function assignMembershipToMember(userId: string, data: any) {
+  try {
+    const { planId, startDate, endDate, amountPaid, pdfAmount, paymentMode } = data
+
+    await prisma.$transaction(async (tx) => {
+      // 1. Create the membership
+      await tx.membership.create({
+        data: {
+          userId,
+          planId,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          amountPaid: Number(amountPaid),
+          pdfAmount: pdfAmount ? Number(pdfAmount) : null,
+          paymentMode,
+          status: 'ACTIVE'
+        }
+      })
+
+      // 2. Clear the requested duration since they now have a plan
+      await tx.memberProfile.update({
+        where: { userId },
+        data: { requestedDuration: null }
+      })
+
+      // 3. Log the payment
+      if (Number(amountPaid) > 0) {
+        await tx.payment.create({
+          data: {
+            userId,
+            amount: Number(amountPaid),
+            paymentMode,
+            status: 'SUCCESS',
+            description: 'Membership Plan Payment'
+          }
+        })
+      }
+    })
+
+    revalidatePath('/admin/members')
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to assign membership:', error)
+    return { success: false, error: 'Failed to assign membership' }
+  }
+}
