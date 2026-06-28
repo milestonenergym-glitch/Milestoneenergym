@@ -91,9 +91,9 @@ export default function MembershipPreview() {
       aria-labelledby="membership-heading"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(15,82,186,0.08),transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(15,82,186,0.08),transparent_70%)] pointer-events-none" />
 
-      <div className="container-custom" ref={ref}>
+      <div className="container-custom relative z-10" ref={ref}>
         {/* Header */}
         <div className="text-center mb-14">
           <motion.span

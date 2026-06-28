@@ -70,10 +70,10 @@ export default function FreeTrialForm() {
       aria-labelledby="free-trial-heading"
     >
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(15,82,186,0.1),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(212,175,55,0.06),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(15,82,186,0.1),transparent_60%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(212,175,55,0.06),transparent_60%)] pointer-events-none" />
 
-      <div className="container-custom" ref={ref}>
+      <div className="container-custom relative z-10" ref={ref}>
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-12">
