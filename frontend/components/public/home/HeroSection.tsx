@@ -162,18 +162,11 @@ export default function HeroSection() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row justify-center items-center gap-3 mb-6"
+          className="flex justify-center mb-6"
         >
           <div className="badge-gold">
             <Zap className="w-3 h-3" />
             Premium Fitness Center
-          </div>
-          <div className="bg-brand-blue/20 border border-brand-blue/40 text-blue-200 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide flex items-center gap-2 backdrop-blur-sm shadow-[0_0_15px_rgba(15,82,186,0.3)]">
-            <Calendar className="w-3.5 h-3.5 text-blue-400" />
-            Opening soon 9th July
-          </div>
-          <div className="bg-red-500/20 border border-red-500/40 text-red-200 px-4 py-1.5 rounded-full text-sm font-bold tracking-wide flex items-center gap-2 backdrop-blur-sm animate-pulse">
-            🔥 Pre-Launch Offer - 50% Off
           </div>
         </motion.div>
 
@@ -265,25 +258,6 @@ export default function HeroSection() {
           </a>
         </motion.div>
 
-        {/* WhatsApp Quick Access */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          <a
-            href={`https://wa.me/${settings?.contactPhone?.replace(/[^0-9]/g, '') || '918875305442'}?text=Hi!%20I%27d%20like%20to%20know%20more%20about%20Milestone%20Energym.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-white/50 hover:text-white text-sm transition-colors group"
-            id="hero-whatsapp"
-          >
-            <div className="w-7 h-7 rounded-full bg-[#25D366]/20 flex items-center justify-center group-hover:bg-[#25D366]/30 transition-colors">
-              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
-            </div>
-            <span>Chat on WhatsApp: {settings?.contactPhone || '+91 88753 05442'}</span>
-          </a>
-        </motion.div>
       </div>
 
       {/* Scroll Indicator */}
