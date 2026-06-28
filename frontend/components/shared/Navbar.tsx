@@ -220,15 +220,6 @@ export default function Navbar() {
               Free Trial
             </Link>
 
-            {/* Member Login */}
-            <Link
-              href="/login"
-              className="btn-outline text-sm py-2.5 px-4"
-              id="nav-login"
-            >
-              Login
-            </Link>
-
             {/* Mobile Menu Toggle */}
             <button
               className="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
@@ -344,13 +335,7 @@ export default function Navbar() {
                 >
                   Book Free Trial
                 </Link>
-                <Link
-                  href="/login"
-                  className="btn-outline w-full justify-center py-3"
-                  id="mobile-login"
-                >
-                  Member Login
-                </Link>
+
                 <a
                   href="tel:+918875305442"
                   className="flex items-center justify-center gap-2 text-white/60 text-sm hover:text-white transition-colors py-2"

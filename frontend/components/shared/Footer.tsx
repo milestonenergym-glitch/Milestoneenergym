@@ -54,6 +54,7 @@ const footerLinks = {
     { label: 'Refund Policy', href: '/refund-policy' },
     { label: 'Terms & Conditions', href: '/terms' },
     { label: 'Cookie Policy', href: '/cookie-policy' },
+    { label: 'Admin Login', href: '/login' },
   ],
   social: [
     { label: 'Instagram', icon: InstagramIcon, key: 'instagramUrl', color: '#E1306C' },
