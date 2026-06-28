@@ -1,6 +1,7 @@
 import { getMemberById, getMemberSequentialId } from '@/app/actions/members'
 import { getGymSettings } from '@/app/actions/settings'
 import { notFound } from 'next/navigation'
+import DownloadPdfButton from '@/components/DownloadPdfButton'
 
 // Optional: You can load a cursive font for the signature from Google Fonts
 // like 'Great Vibes' or 'Dancing Script'. We'll use inline styles for it.
@@ -24,7 +25,7 @@ export default async function MemberContractPage({ params }: { params: Promise<{
 
   return (
     <div className="bg-white text-black min-h-screen font-serif print:bg-white print:m-0 print:p-0">
-      <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 print:shadow-none print:max-w-none print:w-full print:p-8">
+      <div id="contract-content" className="max-w-4xl mx-auto bg-white p-8 md:p-12 print:shadow-none print:max-w-none print:w-full print:p-8">
         
         {/* Header Section */}
         <div className="flex justify-between items-start border-b-2 border-black pb-6 mb-8">
@@ -165,14 +166,11 @@ export default async function MemberContractPage({ params }: { params: Promise<{
           </div>
         </div>
 
-        {/* Print Button - Hidden when printing */}
-        <div className="mt-12 text-center print:hidden">
-          <button 
-            className="bg-black text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors"
-          >
-            Click Ctrl+P (or Cmd+P) to Print / Save PDF
-          </button>
-        </div>
+        {/* Download Button - Handles actual PDF generation via html2pdf */}
+        <DownloadPdfButton 
+          memberName={member.name || 'Member'} 
+          sequentialId={sequentialId} 
+        />
 
       </div>
     </div>
