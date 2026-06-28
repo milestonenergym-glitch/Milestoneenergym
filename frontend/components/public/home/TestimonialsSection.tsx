@@ -17,17 +17,39 @@ export default function TestimonialsSection() {
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [current, setCurrent] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  const [dbTestimonials, setDbTestimonials] = useState<any[]>([])
+
+  useEffect(() => {
+    import('@/app/actions/testimonials').then(({ getTestimonials }) => {
+      getTestimonials().then(data => {
+        const activeTestimonials = data.filter((t: any) => t.isActive)
+        setDbTestimonials(activeTestimonials)
+      })
+    })
+  }, [])
+
+  const activeTestimonials = dbTestimonials.length > 0 ? dbTestimonials.map(t => ({
+    id: t.id,
+    name: t.name,
+    role: t.role || 'Member',
+    rating: t.rating || 5,
+    text: t.content,
+    since: t.createdAt ? `Member since ${new Date(t.createdAt).getFullYear()}` : 'Member',
+    avatar: t.imageUrl ? (
+      <img src={t.imageUrl} alt={t.name} className="w-full h-full object-cover rounded-full" />
+    ) : t.name.charAt(0)
+  })) : testimonials
 
   useEffect(() => {
     if (!isAutoPlaying) return
     const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % testimonials.length)
+      setCurrent(prev => (prev + 1) % activeTestimonials.length)
     }, 5000)
     return () => clearInterval(timer)
-  }, [isAutoPlaying])
+  }, [isAutoPlaying, activeTestimonials.length])
 
-  const prev = () => { setIsAutoPlaying(false); setCurrent(p => (p - 1 + testimonials.length) % testimonials.length) }
-  const next = () => { setIsAutoPlaying(false); setCurrent(p => (p + 1) % testimonials.length) }
+  const prev = () => { setIsAutoPlaying(false); setCurrent(p => (p - 1 + activeTestimonials.length) % activeTestimonials.length) }
+  const next = () => { setIsAutoPlaying(false); setCurrent(p => (p + 1) % activeTestimonials.length) }
 
   return (
     <section
@@ -68,30 +90,30 @@ export default function TestimonialsSection() {
                 exit={{ opacity: 0, y: -20, scale: 0.98 }}
                 transition={{ duration: 0.4 }}
                 className="glass rounded-2xl p-8 md:p-10 border border-white/10 relative overflow-hidden"
-                id={`testimonial-${testimonials[current].id}`}
+                id={`testimonial-${activeTestimonials[current]?.id}`}
               >
                 {/* Quote mark */}
                 <Quote className="absolute top-6 right-6 w-10 h-10 text-brand-gold/10" />
 
                 {/* Stars */}
                 <div className="flex items-center gap-1 mb-6">
-                  {[...Array(testimonials[current].rating)].map((_, i) => (
+                  {[...Array(activeTestimonials[current]?.rating || 5)].map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-brand-gold text-brand-gold" />
                   ))}
                 </div>
 
                 <blockquote className="text-white/80 text-lg md:text-xl leading-relaxed mb-8 italic">
-                  "{testimonials[current].text}"
+                  "{activeTestimonials[current]?.text}"
                 </blockquote>
 
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-blue to-brand-gold flex items-center justify-center text-white font-bold text-lg">
-                    {testimonials[current].avatar}
+                    {activeTestimonials[current]?.avatar}
                   </div>
                   <div>
-                    <div className="text-white font-semibold">{testimonials[current].name}</div>
-                    <div className="text-white/40 text-sm">{testimonials[current].role}</div>
-                    <div className="text-brand-gold/60 text-xs mt-0.5">{testimonials[current].since}</div>
+                    <div className="text-white font-semibold">{activeTestimonials[current]?.name}</div>
+                    <div className="text-white/40 text-sm">{activeTestimonials[current]?.role}</div>
+                    <div className="text-brand-gold/60 text-xs mt-0.5">{activeTestimonials[current]?.since}</div>
                   </div>
                 </div>
               </motion.div>
@@ -109,7 +131,7 @@ export default function TestimonialsSection() {
             </button>
 
             <div className="flex items-center gap-2">
-              {testimonials.map((_, i) => (
+              {activeTestimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => { setIsAutoPlaying(false); setCurrent(i) }}

@@ -28,7 +28,15 @@ export default function HeroSection() {
   const [settings, setSettings] = useState<any>(null)
   const heroRef = useRef<HTMLDivElement>(null)
 
-  const backgrounds = [
+  const [dbBanners, setDbBanners] = useState<any[]>([])
+
+  const defaultHeadlines = [
+    'Train Hard.',
+    'Stay Strong.',
+    'Transform Now.',
+  ]
+
+  const defaultBackgrounds = [
     '/about-hero.png',
     '/class-strength.png',
     '/class-cardio.png',
@@ -37,16 +45,30 @@ export default function HeroSection() {
 
   useEffect(() => {
     getGymSettings().then(data => setSettings(data))
+    import('@/app/actions/hero').then(({ getHeroBanners }) => {
+      getHeroBanners().then(data => {
+        const activeBanners = data.filter((b: any) => b.isActive)
+        setDbBanners(activeBanners)
+      })
+    })
   }, [])
+
+  const activeHeadlines = dbBanners.length > 0 
+    ? dbBanners.map(b => b.title || 'Train Hard.')
+    : defaultHeadlines
+    
+  const activeBackgrounds = dbBanners.length > 0
+    ? dbBanners.map(b => b.imageUrl)
+    : defaultBackgrounds
 
   // Cycle through headlines and backgrounds
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentHeadline(prev => (prev + 1) % headlines.length)
-      setCurrentBg(prev => (prev + 1) % backgrounds.length)
+      setCurrentHeadline(prev => (prev + 1) % activeHeadlines.length)
+      setCurrentBg(prev => (prev + 1) % activeBackgrounds.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [backgrounds.length])
+  }, [activeHeadlines.length, activeBackgrounds.length])
 
   // Parallax mouse effect
   useEffect(() => {
@@ -78,9 +100,9 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#050510] via-[#0a0a1a] to-[#0a050a]" />
 
         {/* Animated Background Images */}
-        {backgrounds.map((bg, index) => (
+        {activeBackgrounds.map((bg, index) => (
           <div
-            key={bg}
+            key={`bg-${index}`}
             className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ease-in-out ${
               currentBg === index ? 'opacity-100' : 'opacity-0'
             }`}
@@ -169,9 +191,9 @@ export default function HeroSection() {
 
           {/* Cycling sub-headline */}
           <div className="h-[clamp(3rem,7vw,5.5rem)] overflow-hidden relative">
-            {headlines.map((line, i) => (
+            {activeHeadlines.map((line, i) => (
               <motion.div
-                key={line}
+                key={`headline-${i}`}
                 className="absolute inset-0 flex items-center justify-center"
                 initial={{ y: 80, opacity: 0 }}
                 animate={{

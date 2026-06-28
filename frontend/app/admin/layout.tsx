@@ -10,6 +10,7 @@ import {
   Users, 
   Dumbbell, 
   CalendarDays, 
+  CalendarDays as Calendar, 
   CreditCard, 
   MessageSquare, 
   Settings, 
@@ -20,7 +21,9 @@ import {
   Search,
   ChevronDown,
   Tag,
-  Megaphone
+  Megaphone,
+  UserCheck,
+  ImageIcon as ImageIcon
 } from 'lucide-react'
 
 import { useSession, signOut } from 'next-auth/react'
@@ -28,15 +31,18 @@ import { useSession, signOut } from 'next-auth/react'
 // import { api } from '@/lib/api'
 
 const SIDEBAR_LINKS = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
-  { icon: MessageSquare, label: 'Leads (CRM)', href: '/admin/leads' },
-  { icon: Users, label: 'Members', href: '/admin/members' },
-  { icon: Tag, label: 'Membership Plans', href: '/admin/plans' },
-  { icon: Dumbbell, label: 'Classes & Trainers', href: '/admin/classes' },
-  { icon: CalendarDays, label: 'Attendance', href: '/admin/attendance' },
-  { icon: CreditCard, label: 'Payments', href: '/admin/payments' },
-  { icon: Megaphone, label: 'Marketing Popup', href: '/admin/marketing-popup' },
-  { icon: Settings, label: 'Settings', href: '/admin/settings' },
+  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { label: 'Leads', href: '/admin/leads', icon: Users },
+  { label: 'Members', href: '/admin/members', icon: UserCheck },
+  { label: 'Attendance', href: '/admin/attendance', icon: Calendar },
+  { label: 'Payments', href: '/admin/payments', icon: CreditCard },
+  { label: 'Plans', href: '/admin/plans', icon: Tag },
+  { label: 'Classes', href: '/admin/classes', icon: Dumbbell },
+  { label: 'Trainers', href: '/admin/trainers', icon: Users },
+  { label: 'Hero Banners', href: '/admin/hero', icon: ImageIcon },
+  { label: 'Testimonials', href: '/admin/testimonials', icon: MessageSquare },
+  { label: 'Marketing Popup', href: '/admin/marketing-popup', icon: Megaphone },
+  { label: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

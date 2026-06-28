@@ -1,12 +1,12 @@
 'use client'
 
-import { useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ExternalLink, ArrowRight, Award } from 'lucide-react'
 
-const trainers = [
+const defaultTrainers = [
   {
     id: 't1',
     name: 'Rahul Singh',
@@ -52,6 +52,26 @@ const trainers = [
 export default function TrainersSection() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const [dbTrainers, setDbTrainers] = useState<any[]>([])
+
+  useEffect(() => {
+    import('@/app/actions/trainers').then(({ getTrainerProfiles }) => {
+      getTrainerProfiles().then(data => {
+        setDbTrainers(data)
+      })
+    })
+  }, [])
+
+  const activeTrainers = dbTrainers.length > 0 ? dbTrainers.map((t, index) => ({
+    id: t.id,
+    name: t.user?.name || 'Trainer',
+    specialty: t.specialization || 'General Trainer',
+    experience: `${t.experienceYears} Years`,
+    certifications: t.bio ? [t.bio] : ['Certified Trainer'],
+    instagram: '#',
+    image: t.user?.image || `/images/trainer-${(index % 4) + 1}.jpg`,
+    gradient: index % 2 === 0 ? 'from-brand-blue/30 to-transparent' : 'from-brand-gold/20 to-transparent'
+  })) : defaultTrainers
 
   return (
     <section
@@ -87,7 +107,7 @@ export default function TrainersSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trainers.map((trainer, index) => (
+          {activeTrainers.map((trainer, index) => (
             <motion.div
               key={trainer.id}
               initial={{ y: 40, opacity: 0 }}
