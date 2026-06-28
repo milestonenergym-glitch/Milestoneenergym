@@ -135,10 +135,10 @@ export default function MembershipPreview() {
               initial={{ y: 40, opacity: 0 }}
               animate={inView ? { y: 0, opacity: 1 } : {}}
               transition={{ delay: index * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className={`relative rounded-2xl p-6 flex flex-col transition-all duration-400 cursor-default ${
+              className={`relative overflow-visible rounded-2xl p-6 flex flex-col transition-all duration-400 cursor-default ${
                 plan.popular
-                  ? 'border-2 border-brand-gold/40 bg-gradient-to-b from-brand-gold/10 to-transparent'
-                  : 'glass border border-white/8'
+                  ? 'border-2 border-[#D4AF37]/50 bg-gradient-to-b from-[#D4AF37]/10 to-transparent'
+                  : 'glass border border-white/10'
               }`}
               style={{
                 boxShadow: hoveredPlan === plan.id
@@ -152,8 +152,8 @@ export default function MembershipPreview() {
             >
               {/* Popular Badge */}
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-brand-gold-400 to-brand-gold text-black text-xs font-bold px-4 py-1.5 rounded-full">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                  <div className="flex items-center gap-1.5 bg-gradient-to-r from-[#E7BE3A] to-[#D4AF37] text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-[0_0_15px_rgba(212,175,55,0.4)]">
                     <Zap className="w-3 h-3" />
                     Most Popular
                   </div>
@@ -206,10 +206,10 @@ export default function MembershipPreview() {
               {/* CTA */}
               <Link
                 href={`/membership?plan=${plan.id}`}
-                className={`w-full text-center py-3 rounded-xl font-semibold text-sm transition-all ${
+                className={`w-full text-center py-3 rounded-xl font-semibold text-sm transition-all z-10 relative ${
                   plan.popular
-                    ? 'bg-gradient-to-r from-brand-gold-400 to-brand-gold text-black hover:opacity-90'
-                    : 'bg-gradient-to-r from-brand-blue to-blue-600 text-white hover:opacity-90'
+                    ? 'bg-gradient-to-r from-[#E7BE3A] to-[#D4AF37] text-black hover:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                    : 'bg-gradient-to-r from-[#0F52BA] to-[#0C44A0] text-white hover:opacity-90'
                 }`}
                 id={`plan-cta-${plan.id}`}
               >

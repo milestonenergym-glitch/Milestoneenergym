@@ -147,14 +147,14 @@ export default function MembershipPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className={`relative glass p-8 rounded-3xl border transition-all duration-300 hover:-translate-y-2 ${
+              className={`relative overflow-visible glass p-8 rounded-3xl border transition-all duration-300 hover:-translate-y-2 ${
                 plan.popular 
-                  ? 'border-brand-gold/50 shadow-[0_0_40px_rgba(235,178,54,0.15)] bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A]' 
+                  ? 'border-[#D4AF37]/50 shadow-[0_0_40px_rgba(212,175,55,0.15)] bg-gradient-to-b from-[#1A1A1A] to-[#0A0A0A]' 
                   : 'border-white/10 hover:border-white/20'
               }`}
             >
               {plan.popular && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-brand-gold text-[#0A0A0A] text-xs font-bold uppercase tracking-wider rounded-full">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 bg-gradient-to-r from-[#E7BE3A] to-[#D4AF37] text-[#0A0A0A] text-xs font-bold uppercase tracking-wider rounded-full shadow-[0_0_15px_rgba(212,175,55,0.4)] z-20">
                   Most Popular
                 </div>
               )}
@@ -167,9 +167,9 @@ export default function MembershipPage() {
                 <span className="text-white/50">{plan.period}</span>
               </div>
               
-              <Link href="/contact" className={`block w-full text-center py-3 rounded-xl font-semibold transition-all duration-300 ${
+              <Link href="/contact" className={`block w-full text-center py-3 rounded-xl font-semibold transition-all duration-300 relative z-10 ${
                 plan.popular 
-                  ? 'bg-brand-gold text-[#0A0A0A] hover:bg-brand-gold-400 shadow-[0_0_20px_rgba(235,178,54,0.3)] hover:shadow-[0_0_30px_rgba(235,178,54,0.5)]' 
+                  ? 'bg-gradient-to-r from-[#E7BE3A] to-[#D4AF37] text-[#0A0A0A] hover:opacity-90 shadow-[0_0_20px_rgba(212,175,55,0.3)]' 
                   : 'bg-white/5 text-white hover:bg-white/10'
               }`}>
                 Join Now
