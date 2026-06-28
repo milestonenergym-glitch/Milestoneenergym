@@ -13,13 +13,14 @@ export default function LeadCapturePopup() {
 
   useEffect(() => {
     const hasSubmitted = localStorage.getItem('hasSubmittedPopupLead')
-    if (!hasSubmitted) {
+    // If not submitted, and currently not showing, and hasn't just succeeded
+    if (!hasSubmitted && !show && !success) {
       const timer = setTimeout(() => {
         setShow(true)
-      }, 5000)
+      }, 5000) // Wait 5 seconds before showing again
       return () => clearTimeout(timer)
     }
-  }, [])
+  }, [show, success])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
