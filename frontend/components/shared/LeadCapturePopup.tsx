@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { submitPopupLead } from '@/app/actions/leads'
-import { Dumbbell, User, Phone, Mail, Calendar, Users, Target, Clock, MessageSquare, Ticket, CheckCircle2 } from 'lucide-react'
+import { Dumbbell, User, Phone, Mail, Calendar, Users, Target, Clock, MessageSquare, Ticket, CheckCircle2, X } from 'lucide-react'
 
 export default function LeadCapturePopup() {
   const [show, setShow] = useState(false)
@@ -65,12 +65,13 @@ export default function LeadCapturePopup() {
     <AnimatePresence>
       {show && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
-          {/* Backdrop (Click to close optional, but typically forced) */}
+          {/* Backdrop (Click to close) */}
           <motion.div
+            onClick={() => setShow(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 backdrop-blur-sm cursor-pointer"
           />
 
           {/* Modal */}
@@ -78,11 +79,17 @@ export default function LeadCapturePopup() {
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-3xl overflow-hidden rounded-2xl bg-[#18181b] border border-white/10 shadow-2xl"
+            className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-[#18181b] border border-white/10 shadow-2xl my-auto max-h-[90vh] overflow-y-auto custom-scrollbar"
           >
-            {/* Header Content outside the box in design, but we'll keep it inside for modal structure, 
-                or we can style it to look like the image. The image shows a dark background for the whole thing. */}
-            <div className="p-8 md:p-10">
+            {/* Close Button */}
+            <button 
+              onClick={() => setShow(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-white/5 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6 md:p-8">
               
               {/* Badge */}
               <div className="flex justify-center mb-6">
@@ -93,11 +100,11 @@ export default function LeadCapturePopup() {
               </div>
 
               {/* Title */}
-              <div className="text-center mb-10">
-                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-3">
                   Book Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Free</span> Trial
                 </h2>
-                <p className="text-white/60 text-sm md:text-base">
+                <p className="text-white/60 text-xs md:text-sm px-4">
                   Experience Milestone Energym for one full day — absolutely free. No commitment required.
                 </p>
               </div>
@@ -117,7 +124,7 @@ export default function LeadCapturePopup() {
                 </motion.div>
               ) : (
                 /* Form Box */
-                <div className="bg-[#1e1e22] border border-white/5 rounded-2xl p-6 md:p-8">
+                <div className="bg-[#1e1e22] border border-white/5 rounded-2xl p-5 md:p-6">
                   {error && (
                     <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg mb-6 text-center">
                       {error}
