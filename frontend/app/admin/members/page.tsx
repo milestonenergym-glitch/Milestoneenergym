@@ -93,6 +93,9 @@ export default function MembersPage() {
 
   const getMembershipStatus = (member: any) => {
     if (!member.memberships || member.memberships.length === 0) {
+      if (member.profile?.requestedDuration) {
+        return <span className="bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full text-xs font-semibold border border-amber-500/20">PENDING</span>
+      }
       return <span className="bg-zinc-500/10 text-zinc-500 px-2.5 py-1 rounded-full text-xs font-semibold border border-zinc-500/20">NO PLAN</span>
     }
     const current = member.memberships[0]
