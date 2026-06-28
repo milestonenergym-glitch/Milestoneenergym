@@ -1,27 +1,29 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { X, ZoomIn } from 'lucide-react'
-
-// Using the images we've already generated for the project
-const galleryImages = [
-  { id: 1, src: '/about-hero.png', alt: 'Gym Interior Wide', category: 'facility' },
-  { id: 2, src: '/class-strength.png', alt: 'Strength Area', category: 'equipment' },
-  { id: 3, src: '/class-yoga.png', alt: 'Yoga Studio', category: 'facility' },
-  { id: 4, src: '/about-story.png', alt: 'Dumbbells Close Up', category: 'equipment' },
-  { id: 5, src: '/class-crossfit.png', alt: 'CrossFit Area', category: 'classes' },
-  { id: 6, src: '/class-cardio.png', alt: 'Cardio Zone', category: 'facility' },
-]
+import { getGalleryImages } from '@/app/actions/gallery'
 
 export default function GalleryPage() {
-  const [filter, setFilter] = useState('all')
+  const [filter, setFilter] = useState('All')
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [dbImages, setDbImages] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredImages = filter === 'all' 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === filter)
+  useEffect(() => {
+    async function load() {
+      const data = await getGalleryImages()
+      setDbImages(data.filter((img: any) => img.isActive))
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const filteredImages = filter === 'All' 
+    ? dbImages 
+    : dbImages.filter(img => img.category.toLowerCase() === filter.toLowerCase())
 
   return (
     <div className="min-h-screen pt-[120px] pb-24">
@@ -51,10 +53,10 @@ export default function GalleryPage() {
           className="flex flex-wrap justify-center gap-3"
         >
           {[
-            { id: 'all', label: 'All Photos' },
-            { id: 'facility', label: 'Facility' },
-            { id: 'equipment', label: 'Equipment' },
-            { id: 'classes', label: 'Classes' },
+            { id: 'All', label: 'All Photos' },
+            { id: 'Facility', label: 'Facility' },
+            { id: 'Equipment', label: 'Equipment' },
+            { id: 'Classes', label: 'Classes' },
           ].map((cat) => (
             <button
               key={cat.id}
@@ -73,43 +75,48 @@ export default function GalleryPage() {
 
       {/* Gallery Grid */}
       <div className="container-custom">
-        <motion.div layout className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-          <AnimatePresence>
-            {filteredImages.map((image) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                key={image.id}
-                className="relative rounded-2xl overflow-hidden group cursor-pointer break-inside-avoid border border-white/10"
-                onClick={() => setSelectedImage(image.src)}
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={800}
-                  height={600}
-                  className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px]">
-                  <ZoomIn className="w-10 h-10 text-brand-gold mb-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
-                  <span className="text-white font-semibold uppercase tracking-wider translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
-                    View Full
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
-
-        {filteredImages.length === 0 && (
-          <div className="text-center py-20 text-white/50">
-            No images found for this category.
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin w-12 h-12 border-4 border-brand-gold border-t-transparent rounded-full"></div>
           </div>
+        ) : dbImages.length === 0 ? (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center max-w-2xl mx-auto">
+            <h3 className="text-xl font-bold mb-3">Check back soon!</h3>
+            <p className="text-white/60">We are currently updating our gallery with fresh photos of our premium facility.</p>
+          </div>
+        ) : (
+          <motion.div layout className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            <AnimatePresence>
+              {filteredImages.map((image) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4 }}
+                  key={image.id}
+                  className="relative rounded-2xl overflow-hidden group cursor-pointer break-inside-avoid border border-white/10"
+                  onClick={() => setSelectedImage(image.imageUrl)}
+                >
+                  <Image
+                    src={image.imageUrl}
+                    alt={image.title || image.category}
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center backdrop-blur-[2px]">
+                    <ZoomIn className="w-10 h-10 text-brand-gold mb-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-300" />
+                    <span className="text-white font-semibold uppercase tracking-wider translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75">
+                      View Full Size
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
 

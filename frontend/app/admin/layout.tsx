@@ -42,6 +42,7 @@ const SIDEBAR_LINKS = [
   { label: 'Trainers', href: '/admin/trainers', icon: Users },
   { label: 'Hero Banners', href: '/admin/hero', icon: ImageIcon },
   { label: 'Testimonials', href: '/admin/testimonials', icon: MessageSquare },
+  { label: 'Gallery', href: '/admin/gallery', icon: ImageIcon },
   { label: 'Blog', href: '/admin/blog', icon: FileText },
   { label: 'Marketing Popup', href: '/admin/marketing-popup', icon: Megaphone },
   { label: 'Settings', href: '/admin/settings', icon: Settings },
