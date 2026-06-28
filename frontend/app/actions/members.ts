@@ -46,6 +46,22 @@ export async function getMemberById(id: string) {
   }
 }
 
+export async function getMemberSequentialId(createdAt: Date) {
+  try {
+    const count = await prisma.user.count({
+      where: {
+        role: 'MEMBER',
+        createdAt: {
+          lte: createdAt
+        }
+      }
+    })
+    return `MILESTONEENERGYM${String(count).padStart(3, '0')}`
+  } catch (error) {
+    return `MILESTONEENERGYM001`
+  }
+}
+
 export async function createMember(data: any) {
   try {
     const { name, email, phone, planId, durationInDays, amountPaid, ...profileData } = data

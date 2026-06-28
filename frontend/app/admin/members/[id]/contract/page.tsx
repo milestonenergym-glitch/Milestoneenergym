@@ -1,4 +1,4 @@
-import { getMemberById } from '@/app/actions/members'
+import { getMemberById, getMemberSequentialId } from '@/app/actions/members'
 import { getGymSettings } from '@/app/actions/settings'
 import { notFound } from 'next/navigation'
 
@@ -15,6 +15,8 @@ export default async function MemberContractPage({ params }: { params: Promise<{
   if (!member) {
     notFound()
   }
+
+  const sequentialId = await getMemberSequentialId(member.createdAt)
 
   const profile: any = member.profile || {}
   const activeMembership = member.memberships?.[0]
@@ -44,7 +46,7 @@ export default async function MemberContractPage({ params }: { params: Promise<{
               Date: {new Date().toLocaleDateString('en-IN')}
             </p>
             <p className="text-sm text-gray-600">
-              Member ID: {member.id.substring(member.id.length - 8).toUpperCase()}
+              Member ID: {sequentialId}
             </p>
           </div>
         </div>

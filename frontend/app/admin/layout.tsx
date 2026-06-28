@@ -80,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex text-zinc-100 font-sans selection:bg-brand-gold/30">
+    <div className="min-h-screen bg-zinc-950 flex text-zinc-100 font-sans selection:bg-brand-gold/30 print:bg-white print:text-black">
       
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
@@ -98,6 +98,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside 
         className={`
+          print:hidden
           fixed lg:static inset-y-0 left-0 z-50
           w-64 bg-zinc-900 border-r border-white/5 
           flex flex-col transition-transform duration-300 ease-in-out
@@ -171,10 +172,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden print:overflow-visible">
         
         {/* Top Header */}
-        <header className="h-16 bg-zinc-900/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 z-30">
+        <header className="h-16 bg-zinc-900/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 z-30 print:hidden">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setMobileMenuOpen(true)}
