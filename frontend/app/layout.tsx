@@ -183,7 +183,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const settings = await getGymSettings()
-  const gaId = settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID || ''
+  const gaId = settings?.googleAnalyticsId || process.env.NEXT_PUBLIC_GA_ID || 'G-ER6L1NHN4M'
   const pixelId = settings?.metaPixelId || process.env.NEXT_PUBLIC_META_PIXEL_ID || ''
 
   return (
