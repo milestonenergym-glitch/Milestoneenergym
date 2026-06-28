@@ -150,14 +150,31 @@ export async function updateMemberProfile(userId: string, data: any) {
 
 export async function assignMembershipToMember(userId: string, data: any) {
   try {
-    const { planId, startDate, endDate, amountPaid, pdfAmount, paymentMode } = data
+    const { durationMonths, startDate, endDate, amountPaid, pdfAmount, paymentMode } = data
 
     await prisma.$transaction(async (tx) => {
+      // Find or create a plan for this duration
+      const planName = `${durationMonths} Month${durationMonths > 1 ? 's' : ''}`
+      let plan = await tx.plan.findFirst({
+        where: { name: planName }
+      })
+
+      if (!plan) {
+        plan = await tx.plan.create({
+          data: {
+            name: planName,
+            durationInDays: Number(durationMonths) * 30,
+            price: 0,
+            isActive: false // Hidden from standard plans
+          }
+        })
+      }
+
       // 1. Create the membership
       await tx.membership.create({
         data: {
           userId,
-          planId,
+          planId: plan.id,
           startDate: new Date(startDate),
           endDate: new Date(endDate),
           amountPaid: Number(amountPaid),

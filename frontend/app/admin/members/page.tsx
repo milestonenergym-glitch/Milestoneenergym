@@ -22,25 +22,25 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<any>(null)
   
   // Plan assignment state
-  const [assignPlanId, setAssignPlanId] = useState('')
+  const [assignDurationMonths, setAssignDurationMonths] = useState('')
   const [assignStartDate, setAssignStartDate] = useState(new Date().toISOString().split('T')[0])
   const [assignEndDate, setAssignEndDate] = useState('')
   const [assignActualAmount, setAssignActualAmount] = useState('')
   const [assignPdfAmount, setAssignPdfAmount] = useState('')
   const [assignPaymentMode, setAssignPaymentMode] = useState('CASH')
 
-  // Auto-calculate end date when plan or start date changes
+  // Auto-calculate end date when duration or start date changes
   useEffect(() => {
-    if (assignPlanId && assignStartDate) {
-      const plan = plans.find(p => p.id === assignPlanId)
-      if (plan) {
+    if (assignDurationMonths && assignStartDate) {
+      const months = parseInt(assignDurationMonths, 10)
+      if (!isNaN(months)) {
         const start = new Date(assignStartDate)
         const end = new Date(start)
-        end.setDate(end.getDate() + plan.durationInDays)
+        end.setDate(end.getDate() + (months * 30))
         setAssignEndDate(end.toISOString().split('T')[0])
       }
     }
-  }, [assignPlanId, assignStartDate, plans])
+  }, [assignDurationMonths, assignStartDate])
 
   useEffect(() => {
     fetchData()
@@ -118,7 +118,7 @@ export default function MembersPage() {
     setEditingMember(member)
     setIsEditModalOpen(true)
     // Reset plan assignment fields
-    setAssignPlanId('')
+    setAssignDurationMonths('')
     setAssignActualAmount('')
     setAssignPdfAmount('')
     setAssignPaymentMode('CASH')
@@ -151,10 +151,10 @@ export default function MembersPage() {
 
   const handleAssignPlan = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!editingMember || !assignPlanId) return
+    if (!editingMember || !assignDurationMonths) return
     setIsSubmitting(true)
     const data = {
-      planId: assignPlanId,
+      durationMonths: assignDurationMonths,
       startDate: assignStartDate,
       endDate: assignEndDate,
       amountPaid: assignActualAmount,
@@ -561,16 +561,18 @@ export default function MembersPage() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    <label className="text-sm text-zinc-400">Select Plan</label>
+                    <label className="text-sm text-zinc-400">Duration (Months)</label>
                     <select 
-                      value={assignPlanId} 
-                      onChange={(e) => setAssignPlanId(e.target.value)}
+                      value={assignDurationMonths} 
+                      onChange={(e) => setAssignDurationMonths(e.target.value)}
                       required 
                       className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
                     >
-                      <option value="">Choose a plan...</option>
-                      {plans.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
+                      <option value="">Select duration...</option>
+                      {[...Array(12)].map((_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1} Month{i + 1 > 1 ? 's' : ''}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -630,7 +632,7 @@ export default function MembersPage() {
                       <option value="CARD">Card</option>
                     </select>
                   </div>
-                  <button type="submit" disabled={isSubmitting || !assignPlanId} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
+                  <button type="submit" disabled={isSubmitting || !assignDurationMonths} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
                     {isSubmitting ? 'Assigning...' : 'Assign Plan & Mark Paid'}
                   </button>
                 </form>
