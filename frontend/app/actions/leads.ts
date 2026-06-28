@@ -45,12 +45,29 @@ export async function submitLead(formData: FormData) {
   }
 }
 
-export async function submitPopupLead(data: { name: string; phone: string; email?: string; pincode: string }) {
+export async function submitPopupLead(data: { 
+  name: string; 
+  phone: string; 
+  email?: string;
+  age: string;
+  gender: string;
+  goal: string;
+  time: string;
+  message?: string;
+}) {
   try {
     // Basic validation
-    if (!data.name || !data.phone || !data.pincode) {
-      return { success: false, error: 'Name, Phone and Pincode are required' }
+    if (!data.name || !data.phone) {
+      return { success: false, error: 'Name and Phone are required' }
     }
+
+    const formattedMessage = `
+Age: ${data.age}
+Gender: ${data.gender}
+Goal: ${data.goal}
+Preferred Time: ${data.time}
+Message: ${data.message || 'No additional message'}
+    `.trim()
 
     await prisma.lead.create({
       data: {
@@ -58,9 +75,10 @@ export async function submitPopupLead(data: { name: string; phone: string; email
         lastName: '-', // Dummy as it's a single name field
         phone: data.phone,
         email: data.email || 'No email provided',
-        pincode: data.pincode,
+        pincode: 'Not Provided', // Not collecting this anymore
         source: 'POPUP',
-        subject: 'New Popup Lead',
+        subject: 'New Free Trial Request',
+        message: formattedMessage,
       },
     })
 
