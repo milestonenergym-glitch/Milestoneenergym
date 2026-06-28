@@ -16,19 +16,40 @@ import BlogPreview from '@/components/public/home/BlogPreview'
 import GoogleMapSection from '@/components/public/home/GoogleMapSection'
 import CTABanner from '@/components/public/home/CTABanner'
 import { getGymSettings } from '@/app/actions/settings'
+import { preload } from 'react-dom'
 
 export const metadata: Metadata = {
-  title: 'Milestone Energym — Train Hard. Stay Strong. | Premium Fitness Center',
+  title: 'Milestone Energym | Best Gym in Barmer | Fitness Center',
   description:
-    'Join Milestone Energym — a premium fitness center with imported machines, certified trainers, CrossFit, Yoga, Personal Training & flexible memberships. Book your free trial today!',
+    'Join Milestone Energym — the best gym in Barmer. A premium fitness center offering imported machines, certified trainers, CrossFit, Yoga, Personal Training, and Weight Loss programs. Book your free trial today!',
+  keywords: [
+    'Milestone Energym',
+    'milestone gym',
+    'milestone gym Barmer',
+    'Best Gym in Barmer',
+    'Gym Near Me',
+    'Fitness Center',
+    'Personal Training',
+    'Strength Training',
+    'Weight Loss Gym',
+    'Bodybuilding Gym',
+    'Functional Training'
+  ],
   openGraph: {
-    title: 'Milestone Energym — Train Hard. Stay Strong.',
-    description: 'Premium fitness center with certified trainers, imported machines & flexible memberships.',
+    title: 'Milestone Energym | Best Gym in Barmer',
+    description: 'Transform your body at Barmer\'s most premium fitness center. Join Milestone Energym today.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
+  alternates: {
+    canonical: 'https://milestoneenergym.com',
+  }
 }
 
 export default async function HomePage() {
   const settings = await getGymSettings()
+  
+  // Preload hero background image for LCP optimization
+  preload('/about-hero.png', { as: 'image' })
 
   return (
     <main>

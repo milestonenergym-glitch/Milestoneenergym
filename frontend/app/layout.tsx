@@ -112,56 +112,70 @@ export const viewport: Viewport = {
 }
 
 /* ─── Schema.org Structured Data ─── */
-const schemaOrgData = {
-  '@context': 'https://schema.org',
-  '@type': 'GymOrSportsClub',
-  name: 'Milestone Energym',
-  description: 'Premium fitness center offering certified training, imported equipment, CrossFit, Yoga & Personal Training.',
-  url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
-  image: `${siteUrl}/og-image.jpg`,
-  telephone: '+91-8875305442',
-  email: 'info@milestoneenergym.com',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'Your Gym Address',
-    addressLocality: 'Your City',
-    addressRegion: 'Your State',
-    postalCode: '000000',
-    addressCountry: 'IN',
+const schemaOrgData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Milestone Energym',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${siteUrl}/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string'
+    }
   },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: '00.0000',
-    longitude: '00.0000',
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Milestone Energym',
+    url: siteUrl,
+    logo: `${siteUrl}/logo.jpg`,
+    sameAs: [
+      'https://www.instagram.com/milestoneenergym',
+      'https://www.facebook.com/milestoneenergym',
+      'https://www.youtube.com/@milestoneenergym',
+    ]
   },
-  openingHoursSpecification: [
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      opens: '05:00',
-      closes: '23:00',
+  {
+    '@context': 'https://schema.org',
+    '@type': ['GymOrSportsClub', 'LocalBusiness'],
+    name: 'Milestone Energym',
+    description: 'Premium fitness center offering certified training, imported equipment, CrossFit, Yoga & Personal Training in Barmer.',
+    url: siteUrl,
+    logo: `${siteUrl}/logo.jpg`,
+    image: `${siteUrl}/og-image.jpg`,
+    telephone: '+91-8875305442',
+    email: 'Milestonenergym@gmail.com',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'नवलाराम की चक्की, Near Crown Plaza NH68 जैसलमेर रोड बाड़मेर',
+      addressLocality: 'Barmer',
+      addressRegion: 'Rajasthan',
+      postalCode: '344001',
+      addressCountry: 'IN',
     },
-    {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: 'Sunday',
-      opens: '06:00',
-      closes: '22:00',
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '25.7532',
+      longitude: '71.4031',
     },
-  ],
-  priceRange: '₹₹',
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    reviewCount: '500',
-    bestRating: '5',
-  },
-  sameAs: [
-    'https://www.instagram.com/milestoneenergym',
-    'https://www.facebook.com/milestoneenergym',
-    'https://www.youtube.com/@milestoneenergym',
-  ],
-}
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        opens: '05:30',
+        closes: '22:30',
+      },
+    ],
+    priceRange: '₹₹',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '150',
+      bestRating: '5',
+    }
+  }
+]
 
 export default async function RootLayout({
   children,

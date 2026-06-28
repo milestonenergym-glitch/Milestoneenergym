@@ -1,0 +1,11 @@
+/* TEAM */
+Developer: Milestone Energym Team
+Role: Design and Development
+Location: Barmer, Rajasthan, India
+Contact: Milestonenergym@gmail.com
+
+/* SITE */
+Last update: 2024
+Standards: HTML5, CSS3, ES6
+Components: Next.js, React, Tailwind CSS, Prisma
+Software: Node.js
