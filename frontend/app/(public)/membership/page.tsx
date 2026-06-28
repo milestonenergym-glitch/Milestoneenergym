@@ -91,7 +91,7 @@ export default function MembershipPage() {
   useEffect(() => {
     async function load() {
       const data = await getPlans()
-      setDbPlans(data)
+      setDbPlans(data.filter((p: any) => p.isActive))
       setLoading(false)
     }
     load()
