@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Loader2 } from 'lucide-react'
 import { submitLead } from '@/app/actions/leads'

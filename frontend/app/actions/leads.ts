@@ -31,7 +31,10 @@ export async function submitLead(formData: FormData) {
     const validatedData = leadSchema.parse(rawData)
 
     await prisma.lead.create({
-      data: validatedData,
+      data: {
+        ...validatedData,
+        email: validatedData.email || 'No email provided',
+      },
     })
 
     revalidatePath('/admin/leads')
