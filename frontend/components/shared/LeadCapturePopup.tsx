@@ -15,8 +15,8 @@ export default function LeadCapturePopup() {
 
   useEffect(() => {
     const hasSubmitted = localStorage.getItem('hasSubmittedPopupLead')
-    // If not submitted, and currently not showing, and hasn't just succeeded, and not on admin
-    if (!hasSubmitted && !show && !success && !pathname.startsWith('/admin')) {
+    // If not submitted, and currently not showing, and hasn't just succeeded, and not on admin or register pages
+    if (!hasSubmitted && !show && !success && !pathname.startsWith('/admin') && !pathname.startsWith('/register')) {
       const timer = setTimeout(() => {
         setShow(true)
       }, 5000) // Wait 5 seconds before showing again

@@ -10,6 +10,11 @@ export default function OccasionPopup() {
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Don't show popup on admin or register pages
+  if (pathname.startsWith('/admin') || pathname.startsWith('/register')) {
+    return null
+  }
+
   useEffect(() => {
     async function fetchPopup() {
       const settings = await getGymSettings()
