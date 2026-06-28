@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -12,8 +12,8 @@ datasource db {
 // ==========================================
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String  @db.ObjectId
   type              String
   provider          String
   providerAccountId String
@@ -31,15 +31,15 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   sessionToken String   @unique
-  userId       String
+  userId String  @db.ObjectId
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
   email         String?   @unique
   emailVerified DateTime?
@@ -63,6 +63,7 @@ model User {
 }
 
 model VerificationToken {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   identifier String
   token      String   @unique
   expires    DateTime
@@ -75,7 +76,7 @@ model VerificationToken {
 // ==========================================
 
 model GymSettings {
-  id              String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   gymName         String   @default("Milestone Energym")
   logoUrl         String   @default("/logo.jpg")
   contactPhone    String   @default("+91 8875305442")
@@ -93,7 +94,7 @@ model GymSettings {
 }
 
 model HeroBanner {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   imageUrl    String
   title       String?
   subtitle    String?
@@ -107,7 +108,7 @@ model HeroBanner {
 }
 
 model Testimonial {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   role        String?  @default("Member")
   content     String
@@ -118,7 +119,7 @@ model Testimonial {
 }
 
 model GalleryImage {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   imageUrl    String
   category    String   @default("Facility") // Facility, Equipment, Classes
   title       String?
@@ -131,7 +132,7 @@ model GalleryImage {
 // ==========================================
 
 model Lead {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   firstName   String
   lastName    String
   email       String
@@ -143,7 +144,7 @@ model Lead {
   status      String   @default("NEW") // NEW, CONTACTED, INTERESTED, TRIAL, JOINED, LOST
   notes       String?  // Staff follow-up notes
   
-  assignedToId String?
+  assignedToId String? @db.ObjectId
   assignedTo   User?   @relation(fields: [assignedToId], references: [id])
   
   createdAt   DateTime @default(now())
@@ -155,7 +156,7 @@ model Lead {
 // ==========================================
 
 model Plan {
-  id              String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name            String   // e.g., "1 Month Gold", "1 Year VIP"
   description     String?
   price           Float
@@ -174,8 +175,8 @@ model Plan {
 }
 
 model MemberProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String    @unique @db.ObjectId
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   phone             String?
@@ -194,12 +195,12 @@ model MemberProfile {
 }
 
 model Membership {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   
-  userId      String
+  userId String  @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  planId      String
+  planId String @db.ObjectId
   plan        Plan     @relation(fields: [planId], references: [id])
   
   startDate   DateTime
@@ -218,9 +219,9 @@ model Membership {
 // ==========================================
 
 model Payment {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   
-  userId      String
+  userId String  @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   amount      Float
@@ -237,8 +238,8 @@ model Payment {
 // ==========================================
 
 model TrainerProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String    @unique @db.ObjectId
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   specialization    String?  // e.g., Yoga, Powerlifting
@@ -250,13 +251,13 @@ model TrainerProfile {
 }
 
 model GymClass {
-  id              String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   name            String
   description     String?
   capacity        Int      @default(20)
   scheduleTime    String   // e.g., "Mon-Wed-Fri 7:00 AM"
   
-  trainerId       String?
+  trainerId String? @db.ObjectId
   trainer         User?    @relation(fields: [trainerId], references: [id])
   
   isActive        Boolean  @default(true)
@@ -266,9 +267,9 @@ model GymClass {
 }
 
 model Attendance {
-  id          String   @id @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
   
-  userId      String
+  userId String  @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   date        DateTime @default(now())
