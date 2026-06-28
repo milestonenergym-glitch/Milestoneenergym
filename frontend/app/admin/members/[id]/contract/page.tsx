@@ -1,4 +1,5 @@
 import { getMemberById } from '@/app/actions/members'
+import { getGymSettings } from '@/app/actions/settings'
 import { notFound } from 'next/navigation'
 
 // Optional: You can load a cursive font for the signature from Google Fonts
@@ -6,7 +7,10 @@ import { notFound } from 'next/navigation'
 
 export default async function MemberContractPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
-  const member = await getMemberById(resolvedParams.id)
+  const [member, settings] = await Promise.all([
+    getMemberById(resolvedParams.id),
+    getGymSettings()
+  ])
   
   if (!member) {
     notFound()
@@ -22,10 +26,15 @@ export default async function MemberContractPage({ params }: { params: Promise<{
         
         {/* Header Section */}
         <div className="flex justify-between items-start border-b-2 border-black pb-6 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold uppercase tracking-wider mb-2">Milestone Energym</h1>
-            <p className="text-sm text-gray-700">123 Fitness Street, Gym City, 10001</p>
-            <p className="text-sm text-gray-700">Phone: +91 8875305442 | Email: contact@milestoneenergym.com</p>
+          <div className="flex items-center gap-4">
+            {settings?.logoUrl && (
+              <img src={settings.logoUrl} alt="Gym Logo" className="w-16 h-16 object-contain mix-blend-multiply" />
+            )}
+            <div>
+              <h1 className="text-4xl font-bold uppercase tracking-wider mb-1">{settings?.gymName || 'Milestone Energym'}</h1>
+              <p className="text-sm text-gray-700 max-w-sm leading-snug mb-1">{settings?.address || '123 Fitness Street, Gym City, 10001'}</p>
+              <p className="text-sm text-gray-700">Phone: {settings?.contactPhone} | Email: {settings?.contactEmail}</p>
+            </div>
           </div>
           <div className="text-right">
             <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-widest border-2 border-gray-800 px-4 py-2 inline-block">
@@ -65,8 +74,12 @@ export default async function MemberContractPage({ params }: { params: Promise<{
               <p className="font-medium text-lg border-b border-gray-300 pb-1 min-h-[32px]">{profile.address || ' '}</p>
             </div>
             <div>
-              <span className="text-xs text-gray-500 uppercase font-semibold">Emergency Contact</span>
+              <span className="text-xs text-gray-500 uppercase font-semibold">Emergency Contact Name</span>
               <p className="font-medium text-lg border-b border-gray-300 pb-1">{profile.emergencyContact || 'N/A'}</p>
+            </div>
+            <div>
+              <span className="text-xs text-gray-500 uppercase font-semibold">Emergency Contact Phone</span>
+              <p className="font-medium text-lg border-b border-gray-300 pb-1">{profile.emergencyContactPhone || 'N/A'}</p>
             </div>
             <div>
               <span className="text-xs text-gray-500 uppercase font-semibold">Blood Group</span>

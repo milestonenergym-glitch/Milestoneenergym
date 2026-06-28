@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getMembers, createMember } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
-import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X } from 'lucide-react'
+import { generateRegistrationLink } from '@/app/actions/registration-links'
+import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -13,6 +14,8 @@ export default function MembersPage() {
   const [plans, setPlans] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalStep, setModalStep] = useState<'CHOICE' | 'MANUAL' | 'WHATSAPP'>('CHOICE')
+  const [generatedLink, setGeneratedLink] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -65,6 +68,24 @@ export default function MembersPage() {
     setIsSubmitting(false)
   }
 
+  const handleGenerateLink = async () => {
+    setIsSubmitting(true)
+    const res = await generateRegistrationLink()
+    if (res.success) {
+      const link = `${window.location.origin}/register/${res.token}`
+      setGeneratedLink(link)
+      setModalStep('WHATSAPP')
+    } else {
+      toast.error(res.error || 'Failed to generate link')
+    }
+    setIsSubmitting(false)
+  }
+
+  const openWhatsApp = () => {
+    const text = encodeURIComponent(`Hello! Welcome to Milestone Energym. Please fill out your gym registration form by clicking the link below:\n\n${generatedLink}\n\n*Note: This link will expire in 30 minutes.*`)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
+
   const filteredMembers = members.filter(m => 
     m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     m.profile?.phone?.includes(searchTerm)
@@ -107,7 +128,10 @@ export default function MembersPage() {
             />
           </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setModalStep('CHOICE')
+              setIsModalOpen(true)
+            }}
             className="bg-brand-gold text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-brand-gold/90 transition-colors flex items-center gap-2 shrink-0"
           >
             <UserPlus className="w-4 h-4" /> Add Member
@@ -211,72 +235,144 @@ export default function MembersPage() {
               </button>
             </div>
             
-            <form onSubmit={handleCreate} className="p-6 space-y-6">
-              {/* Personal Details */}
-              <div>
-                <h3 className="text-sm font-semibold text-brand-gold mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <Activity className="w-4 h-4" /> Personal Details
-                </h3>
+            {modalStep === 'CHOICE' && (
+              <div className="p-8 space-y-6">
+                <p className="text-zinc-400 text-center mb-6">How would you like to add this member?</p>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Full Name *</label>
-                    <input type="text" name="name" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Phone Number *</label>
-                    <input type="tel" name="phone" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
-                    <input type="email" name="email" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Date of Birth</label>
-                    <input type="date" name="dateOfBirth" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold [color-scheme:dark]" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Gender</label>
-                    <select name="gender" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Blood Group</label>
-                    <input type="text" name="bloodGroup" placeholder="e.g. O+" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
-                  </div>
+                  <button 
+                    onClick={handleGenerateLink}
+                    disabled={isSubmitting}
+                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 border-brand-gold bg-brand-gold/5 hover:bg-brand-gold/10 transition-colors text-white disabled:opacity-50"
+                  >
+                    <MessageCircle className="w-10 h-10 text-brand-gold" />
+                    <div className="text-center">
+                      <div className="font-bold mb-1">Send WhatsApp Link</div>
+                      <div className="text-xs text-zinc-400">Customer fills form (30 min expiry)</div>
+                    </div>
+                  </button>
+                  <button 
+                    onClick={() => setModalStep('MANUAL')}
+                    className="flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-white"
+                  >
+                    <FileEdit className="w-10 h-10 text-zinc-400" />
+                    <div className="text-center">
+                      <div className="font-bold mb-1">Fill Manually</div>
+                      <div className="text-xs text-zinc-400">You enter details right now</div>
+                    </div>
+                  </button>
                 </div>
               </div>
+            )}
 
-              {/* Membership Assignment */}
-              <div className="pt-4 border-t border-white/10">
-                <h3 className="text-sm font-semibold text-brand-gold mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <Calendar className="w-4 h-4" /> Assign Plan
-                </h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-400 mb-1">Select Package</label>
-                    <select name="planId" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
-                      <option value="">No Plan (Add Profile Only)</option>
-                      {plans.map(p => (
-                        <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
-                      ))}
-                    </select>
-                  </div>
+            {modalStep === 'WHATSAPP' && (
+              <div className="p-8 text-center space-y-6">
+                <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Registration Link Generated!</h3>
+                  <p className="text-zinc-400 text-sm">Send this link to the customer via WhatsApp.</p>
+                </div>
+                
+                <div className="flex items-center gap-2 bg-zinc-950 border border-white/10 rounded-lg p-3 overflow-hidden">
+                  <LinkIcon className="w-5 h-5 text-zinc-500 shrink-0" />
+                  <input type="text" readOnly value={generatedLink} className="w-full bg-transparent text-sm text-zinc-300 outline-none" />
+                  <button onClick={() => {navigator.clipboard.writeText(generatedLink); toast.success('Link Copied!')}} className="text-brand-gold text-sm font-semibold whitespace-nowrap hover:underline">
+                    Copy
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-white/10 flex gap-3">
+                  <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3 px-4 rounded-xl font-medium bg-zinc-800 text-white hover:bg-zinc-700 transition-colors">
+                    Close
+                  </button>
+                  <button onClick={openWhatsApp} className="flex-1 py-3 px-4 rounded-xl font-bold bg-[#25D366] text-white hover:bg-[#20b858] transition-colors flex items-center justify-center gap-2">
+                    <MessageCircle className="w-5 h-5" /> Send on WhatsApp
+                  </button>
                 </div>
               </div>
-              
-              {/* Actions */}
-              <div className="flex gap-3 pt-6 border-t border-white/10">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-medium transition-colors">
-                  Cancel
-                </button>
-                <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-3 bg-brand-gold hover:bg-brand-gold/90 text-black rounded-xl font-bold transition-colors disabled:opacity-50">
-                  {isSubmitting ? 'Saving...' : 'Save Member'}
-                </button>
-              </div>
-            </form>
+            )}
+
+            {modalStep === 'MANUAL' && (
+              <form onSubmit={handleCreate} className="p-6 space-y-6">
+                {/* Personal Details */}
+                <div>
+                  <h3 className="text-sm font-semibold text-brand-gold mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <Activity className="w-4 h-4" /> Personal Details
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Full Name *</label>
+                      <input type="text" name="name" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Phone Number *</label>
+                      <input type="tel" name="phone" required className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
+                      <input type="email" name="email" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Date of Birth</label>
+                      <input type="date" name="dateOfBirth" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold [color-scheme:dark]" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Gender</label>
+                      <select name="gender" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Blood Group</label>
+                      <input type="text" name="bloodGroup" placeholder="e.g. O+" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Address</label>
+                      <input type="text" name="address" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Emergency Contact Name</label>
+                      <input type="text" name="emergencyContact" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Emergency Contact Phone</label>
+                      <input type="tel" name="emergencyContactPhone" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Membership Assignment */}
+                <div className="pt-4 border-t border-white/10">
+                  <h3 className="text-sm font-semibold text-brand-gold mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <Calendar className="w-4 h-4" /> Assign Plan
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Select Package</label>
+                      <select name="planId" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
+                        <option value="">No Plan (Add Profile Only)</option>
+                        {plans.map(p => (
+                          <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-3 pt-6 border-t border-white/10">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-medium transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-3 bg-brand-gold hover:bg-brand-gold/90 text-black rounded-xl font-bold transition-colors disabled:opacity-50">
+                    {isSubmitting ? 'Saving...' : 'Save Member'}
+                  </button>
+                </div>
+              </form>
+            )}
           </motion.div>
         </div>
       )}

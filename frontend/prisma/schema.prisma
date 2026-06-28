@@ -72,6 +72,15 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model RegistrationLink {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
 // ==========================================
 // 2. WEBSITE CMS & SETTINGS
 // ==========================================
@@ -216,6 +225,7 @@ model MemberProfile {
   gender            String?
   address           String?
   emergencyContact  String?
+  emergencyContactPhone String?
   bloodGroup        String?
   medicalConditions String?
   aadharNumber      String?
