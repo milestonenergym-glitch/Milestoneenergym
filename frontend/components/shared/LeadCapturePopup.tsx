@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { submitPopupLead } from '@/app/actions/leads'
 import { Dumbbell, User, Phone, Mail, Calendar, Users, Target, Clock, MessageSquare, Ticket, CheckCircle2, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 export default function LeadCapturePopup() {
+  const pathname = usePathname()
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -13,14 +15,14 @@ export default function LeadCapturePopup() {
 
   useEffect(() => {
     const hasSubmitted = localStorage.getItem('hasSubmittedPopupLead')
-    // If not submitted, and currently not showing, and hasn't just succeeded
-    if (!hasSubmitted && !show && !success) {
+    // If not submitted, and currently not showing, and hasn't just succeeded, and not on admin
+    if (!hasSubmitted && !show && !success && !pathname.startsWith('/admin')) {
       const timer = setTimeout(() => {
         setShow(true)
       }, 5000) // Wait 5 seconds before showing again
       return () => clearTimeout(timer)
     }
-  }, [show, success])
+  }, [show, success, pathname])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()

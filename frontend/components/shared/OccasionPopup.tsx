@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { getGymSettings } from '@/app/actions/settings'
+import { usePathname } from 'next/navigation'
 
 export default function OccasionPopup() {
+  const pathname = usePathname()
   const [htmlContent, setHtmlContent] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -42,7 +44,7 @@ export default function OccasionPopup() {
     }
   }, [isActive, htmlContent])
 
-  if (!isActive || !htmlContent) return null
+  if (!isActive || !htmlContent || pathname.startsWith('/admin')) return null
 
   return (
     <div 
