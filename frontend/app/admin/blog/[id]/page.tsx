@@ -6,9 +6,11 @@ import { getBlogPostById, updateBlogPost } from '@/app/actions/blog'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { use } from 'react'
 
-export default function EditBlogPostPage({ params }: { params: { id: string } }) {
+export default function EditBlogPostPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
+  const { id } = use(params)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({
@@ -22,7 +24,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
 
   useEffect(() => {
     async function loadPost() {
-      const post = await getBlogPostById(params.id)
+      const post = await getBlogPostById(id)
       if (post) {
         setFormData({
           title: post.title,
@@ -39,7 +41,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
       setLoading(false)
     }
     loadPost()
-  }, [params.id, router])
+  }, [id, router])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value
@@ -53,7 +55,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    const res = await updateBlogPost(params.id, formData)
+    const res = await updateBlogPost(id, formData)
 
     if (res.success) {
       toast.success('Blog post updated')
