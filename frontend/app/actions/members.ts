@@ -278,6 +278,30 @@ export async function assignMembershipToMember(userId: string, data: any) {
         })
       }
 
+      if (data.logPayment === false) {
+        const activeMem = await tx.membership.findFirst({
+          where: { userId, status: 'ACTIVE' }
+        })
+        if (activeMem) {
+          const diff = Number(amountPaid) - activeMem.amountPaid
+          const newPendingDues = Math.max(0, activeMem.pendingDues - diff)
+          
+          await tx.membership.update({
+            where: { id: activeMem.id },
+            data: {
+              planId: plan.id,
+              startDate: new Date(startDate),
+              endDate: new Date(endDate),
+              amountPaid: Number(amountPaid),
+              pendingDues: newPendingDues,
+              pdfAmount: pdfAmount ? Number(pdfAmount) : null,
+              paymentMode
+            }
+          })
+          return // Early return since we only updated
+        }
+      }
+
       // Mark existing memberships as EXPIRED so the new one takes precedence
       await tx.membership.updateMany({
         where: { userId },
