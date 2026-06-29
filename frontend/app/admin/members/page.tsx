@@ -366,7 +366,7 @@ export default function MembersPage() {
                     </div>
                   </button>
                   <button 
-                    onClick={() => setModalStep('MANUAL')}
+                    onClick={() => window.location.href = '/admin/members/new'}
                     className="flex flex-col items-center justify-center gap-3 p-6 rounded-xl border-2 border-zinc-700 bg-zinc-800/50 hover:bg-zinc-800 transition-colors text-white"
                   >
                     <FileEdit className="w-10 h-10 text-zinc-400" />

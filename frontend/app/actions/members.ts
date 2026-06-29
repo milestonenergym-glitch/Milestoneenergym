@@ -106,8 +106,8 @@ export async function createMember(data: any) {
       }
 
       if (finalPlanId) {
-        const startDate = new Date()
-        const endDate = new Date()
+        const startDate = data.startDate ? new Date(data.startDate) : new Date()
+        const endDate = new Date(startDate)
         endDate.setDate(endDate.getDate() + finalDurationInDays)
 
         await tx.membership.create({
