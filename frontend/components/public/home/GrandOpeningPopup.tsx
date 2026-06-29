@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 
 export default function GrandOpeningPopup() {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 })
   
   const starsRef = useRef<HTMLDivElement>(null)
@@ -12,6 +12,11 @@ export default function GrandOpeningPopup() {
   const confettiRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Check if already shown
+    if (!localStorage.getItem('grandOpeningPopupShown')) {
+      setIsOpen(true)
+    }
+
     // Generate Stars
     if (starsRef.current) {
       starsRef.current.innerHTML = ''
@@ -99,6 +104,11 @@ export default function GrandOpeningPopup() {
     }
   }, [])
 
+  const closePopup = () => {
+    setIsOpen(false)
+    localStorage.setItem('grandOpeningPopupShown', 'true')
+  }
+
   if (!isOpen) return null
 
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -106,10 +116,10 @@ export default function GrandOpeningPopup() {
   return (
     <div 
       className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
-      onClick={() => setIsOpen(false)}
+      onClick={closePopup}
     >
       <button 
-        onClick={() => setIsOpen(false)} 
+        onClick={closePopup} 
         className="fixed top-4 right-4 md:top-8 md:right-8 w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full flex items-center justify-center text-white text-2xl z-[100000] transition-all cursor-pointer"
         aria-label="Close"
       >
@@ -482,7 +492,7 @@ export default function GrandOpeningPopup() {
           <div className="poster-count-box"><span className="poster-count-num">{pad(timeLeft.s)}</span><div className="poster-count-lbl">SECS</div></div>
         </div>
 
-        <a href="#register" onClick={() => setIsOpen(false)} className="poster-cta-primary"><span>⚡ CLAIM 20% OFF — JOIN NOW</span></a>
+        <a href="#register" onClick={closePopup} className="poster-cta-primary"><span>⚡ CLAIM 20% OFF — JOIN NOW</span></a>
         <a href="https://wa.me/91XXXXXXXXXX" target="_blank" rel="noopener noreferrer" className="poster-cta-secondary"><span>💬 WHATSAPP US TO BOOK</span></a>
 
         <div className="poster-footer-address">

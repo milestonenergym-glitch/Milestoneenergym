@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Shield } from 'lucide-react'
 
-export default function PolicyPage() {
+export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen pt-[120px] pb-24">
       <div className="container-custom">
@@ -22,7 +22,7 @@ export default function PolicyPage() {
                 Privacy Policy
               </h1>
               <p className="text-brand-gold mt-2 text-sm font-semibold uppercase tracking-wider">
-                Last Updated: October 1, 2023
+                Last Updated: June 2026
               </p>
             </div>
           </div>
@@ -32,25 +32,36 @@ export default function PolicyPage() {
               At Milestone Energym, we take your privacy seriously. This policy describes how we collect, use, and protect your personal information when you use our facility, website, and app.
             </p>
             
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">1. Introduction</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">1. Information Collection</h2>
             <p className="text-white/60 leading-relaxed mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              We collect information to provide better services to our members. The types of personal information we collect include:
             </p>
-
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">2. Information Collection</h2>
-            <p className="text-white/60 leading-relaxed mb-6">
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-            </p>
-            
             <ul className="list-disc pl-6 text-white/60 space-y-2 mb-8">
-              <li>Nemo enim ipsam voluptatem quia voluptas sit aspernatur</li>
-              <li>Neque porro quisquam est, qui dolorem ipsum quia dolor</li>
-              <li>Ut enim ad minima veniam, quis nostrum exercitationem</li>
+              <li><strong>Personal Identification Details:</strong> Name, age, gender, contact number, email address, and physical address.</li>
+              <li><strong>Health and Fitness Data:</strong> Current fitness levels, medical history, weight, height, and fitness goals to tailor your workout plans.</li>
+              <li><strong>Payment Information:</strong> Credit card details, UPI IDs, or banking information for processing memberships.</li>
+              <li><strong>Facility Usage Data:</strong> Gym check-in times and class attendance.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">3. Contact Us</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">2. How We Use Your Information</h2>
             <p className="text-white/60 leading-relaxed mb-6">
-              If you have any questions about this policy, please contact us at <a href="mailto:legal@milestoneenergym.com">legal@milestoneenergym.com</a>.
+              We use the collected information for various purposes, including but not limited to:
+            </p>
+            <ul className="list-disc pl-6 text-white/60 space-y-2 mb-8">
+              <li>Providing and managing your gym membership and services.</li>
+              <li>Communicating with you regarding schedule changes, updates, and promotional offers.</li>
+              <li>Personalizing your fitness and diet plans for better results.</li>
+              <li>Ensuring safety and security within the gym premises.</li>
+            </ul>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">3. Data Security</h2>
+            <p className="text-white/60 leading-relaxed mb-8">
+              We implement a variety of security measures to maintain the safety of your personal information. Your data is stored securely and accessed only by authorized personnel for the purpose of managing your fitness journey. We do not sell or trade your personal information to third parties.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">4. Contact Us</h2>
+            <p className="text-white/60 leading-relaxed mb-6">
+              If you have any questions about this Privacy Policy, the practices of our gym, or your dealings with us, please contact us at <a href="mailto:contact@milestoneenergym.com">contact@milestoneenergym.com</a> or visit us at our location in Barmer, Rajasthan.
             </p>
           </div>
         </motion.div>

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { Shield } from 'lucide-react'
 
-export default function PolicyPage() {
+export default function CookiePolicyPage() {
   return (
     <div className="min-h-screen pt-[120px] pb-24">
       <div className="container-custom">
@@ -22,35 +22,44 @@ export default function PolicyPage() {
                 Cookie Policy
               </h1>
               <p className="text-brand-gold mt-2 text-sm font-semibold uppercase tracking-wider">
-                Last Updated: August 10, 2023
+                Last Updated: June 2026
               </p>
             </div>
           </div>
           
           <div className="prose prose-invert max-w-none prose-headings:font-heading prose-headings:uppercase prose-a:text-brand-gold">
             <p className="text-xl text-white/80 leading-relaxed mb-8">
-              Our website uses cookies to enhance your browsing experience, analyze site traffic, and serve personalized advertisements. This policy explains what cookies are and how we use them.
+              This Cookie Policy explains how Milestone Energym uses cookies and similar tracking technologies on our website. It explains what these technologies are, why we use them, and your right to control our use of them.
             </p>
             
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">1. Introduction</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">1. What are Cookies?</h2>
             <p className="text-white/60 leading-relaxed mb-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+              Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">2. Information Collection</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">2. Why We Use Cookies</h2>
             <p className="text-white/60 leading-relaxed mb-6">
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+              We use first-party and third-party cookies for several reasons:
             </p>
-            
             <ul className="list-disc pl-6 text-white/60 space-y-2 mb-8">
-              <li>Nemo enim ipsam voluptatem quia voluptas sit aspernatur</li>
-              <li>Neque porro quisquam est, qui dolorem ipsum quia dolor</li>
-              <li>Ut enim ad minima veniam, quis nostrum exercitationem</li>
+              <li><strong>Essential Cookies:</strong> These cookies are strictly necessary to provide you with services available through our website and to use some of its features.</li>
+              <li><strong>Performance and Functionality Cookies:</strong> These cookies are used to enhance the performance and functionality of our website but are non-essential to their use.</li>
+              <li><strong>Analytics and Customization Cookies:</strong> These cookies collect information that is used either in aggregate form to help us understand how our website is being used or to help us customize our website for you.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">3. Contact Us</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">3. Local Storage</h2>
+            <p className="text-white/60 leading-relaxed mb-8">
+              In addition to cookies, we use local storage technologies. For example, we use local storage to remember whether you have seen our Grand Opening promotional popup so that we do not show it to you multiple times and interrupt your browsing experience.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">4. How to Control Cookies</h2>
             <p className="text-white/60 leading-relaxed mb-6">
-              If you have any questions about this policy, please contact us at <a href="mailto:legal@milestoneenergym.com">legal@milestoneenergym.com</a>.
+              You have the right to decide whether to accept or reject cookies. You can set or amend your web browser controls to accept or refuse cookies. If you choose to reject cookies, you may still use our website though your access to some functionality and areas of our website may be restricted.
+            </p>
+            
+            <h2 className="text-2xl font-bold mt-10 mb-4 text-brand-blue-400">5. Contact Us</h2>
+            <p className="text-white/60 leading-relaxed mb-6">
+              If you have any questions about our use of cookies or other technologies, please email us at <a href="mailto:privacy@milestoneenergym.com">privacy@milestoneenergym.com</a>.
             </p>
           </div>
         </motion.div>
