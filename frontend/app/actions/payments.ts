@@ -10,7 +10,15 @@ export async function getPayments() {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-          select: { name: true, email: true }
+          select: { 
+            name: true, 
+            email: true,
+            memberships: {
+              where: { status: 'ACTIVE' },
+              select: { id: true, pendingDues: true },
+              take: 1
+            }
+          }
         }
       }
     })

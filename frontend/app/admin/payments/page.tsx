@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { getPayments, deletePayment } from '@/app/actions/payments'
-import { CreditCard, IndianRupee, Clock, CheckCircle2, XCircle, Search, Trash2 } from 'lucide-react'
+import { settleDues } from '@/app/actions/members'
+import { CreditCard, IndianRupee, Clock, CheckCircle2, XCircle, Search, Trash2, ShieldAlert } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [isSettleDuesModalOpen, setIsSettleDuesModalOpen] = useState(false)
+  const [settleMembership, setSettleMembership] = useState<any>(null)
+  const [settleAmount, setSettleAmount] = useState('')
+  const [settlePaymentMode, setSettlePaymentMode] = useState('CASH')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     fetchPayments()
@@ -20,6 +26,28 @@ export default function PaymentsPage() {
     const data = await getPayments()
     setPayments(data)
     setLoading(false)
+  }
+
+  const openSettleDuesModal = (membership: any) => {
+    setSettleMembership(membership)
+    setSettleAmount('')
+    setSettlePaymentMode('CASH')
+    setIsSettleDuesModalOpen(true)
+  }
+
+  const handleSettleDues = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!settleMembership || !settleAmount) return
+    setIsSubmitting(true)
+    const res = await settleDues(settleMembership.id, Number(settleAmount), settlePaymentMode)
+    if (res.success) {
+      toast.success('Dues settled successfully!')
+      setIsSettleDuesModalOpen(false)
+      fetchPayments()
+    } else {
+      toast.error(res.error || 'Failed to settle dues')
+    }
+    setIsSubmitting(false)
   }
 
   const handleDeletePayment = async (paymentId: string) => {
@@ -115,7 +143,11 @@ export default function PaymentsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredPayments.map((payment) => (
+                filteredPayments.map((payment) => {
+                  const activeMembership = payment.user?.memberships?.[0]
+                  const hasPendingDues = activeMembership && activeMembership.pendingDues > 0
+
+                  return (
                   <tr key={payment.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="px-6 py-4 font-mono text-xs text-zinc-500">
                       {payment.id.split('-')[0].toUpperCase()}
@@ -123,6 +155,11 @@ export default function PaymentsPage() {
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{payment.user?.name || 'Unknown'}</div>
                       <div className="text-xs text-zinc-500">{payment.user?.email || ''}</div>
+                      {hasPendingDues && (
+                        <div className="text-xs text-red-500 mt-1 font-semibold">
+                          Pending: ₹{activeMembership.pendingDues.toLocaleString('en-IN')}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4">{payment.description || 'N/A'}</td>
                     <td className="px-6 py-4">
@@ -146,7 +183,16 @@ export default function PaymentsPage() {
                         {payment.status}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                      {hasPendingDues && (
+                        <button 
+                          onClick={() => openSettleDuesModal(activeMembership)}
+                          className="text-zinc-500 hover:text-green-500 transition-colors p-2 rounded-lg hover:bg-white/5"
+                          title="Settle Pending Dues"
+                        >
+                          <ShieldAlert className="w-4 h-4" />
+                        </button>
+                      )}
                       <button 
                         onClick={() => handleDeletePayment(payment.id)}
                         className="text-zinc-500 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-white/5"
@@ -156,12 +202,67 @@ export default function PaymentsPage() {
                       </button>
                     </td>
                   </tr>
-                ))
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Settle Dues Modal */}
+      {isSettleDuesModalOpen && settleMembership && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md my-8 relative"
+          >
+            <div className="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-zinc-900 z-10 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-white">Settle Pending Dues</h2>
+              <button onClick={() => setIsSettleDuesModalOpen(false)} className="text-zinc-400 hover:text-white">
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <form onSubmit={handleSettleDues} className="space-y-4">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4">
+                  <div className="text-sm text-red-500 mb-1">Total Pending Amount</div>
+                  <div className="text-2xl font-bold text-red-500">₹{settleMembership.pendingDues.toLocaleString('en-IN')}</div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Amount Being Paid (₹)</label>
+                  <input 
+                    type="number" 
+                    value={settleAmount}
+                    onChange={(e) => setSettleAmount(e.target.value)}
+                    max={settleMembership.pendingDues}
+                    placeholder="e.g. 1000"
+                    required 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Mode of Payment</label>
+                  <select 
+                    value={settlePaymentMode} 
+                    onChange={(e) => setSettlePaymentMode(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="CARD">Card</option>
+                    <option value="BANK">Bank Transfer</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isSubmitting} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
+                  {isSubmitting ? 'Processing...' : '✅ Settle Dues & Print Receipt'}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
