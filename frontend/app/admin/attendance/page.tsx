@@ -1,34 +1,40 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getMembers } from '@/app/actions/members'
-import { markAttendance, getTodayAttendance } from '@/app/actions/attendance'
-import { Search, CheckCircle2, Clock } from 'lucide-react'
+import { markAttendance, getAttendanceByDate } from '@/app/actions/attendance'
+import { Search, CheckCircle2, Clock, Calendar, Users, UserX, UserCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function AttendancePage() {
   const [members, setMembers] = useState<any[]>([])
-  const [todayLogs, setTodayLogs] = useState<any[]>([])
+  const [dailyLogs, setDailyLogs] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
+  
+  // Date selection (default to today)
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
+  
+  // Tabs: ALL, PRESENT, ABSENT
+  const [activeTab, setActiveTab] = useState<'ALL' | 'PRESENT' | 'ABSENT'>('ALL')
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     const [membersData, logsData] = await Promise.all([
       getMembers(),
-      getTodayAttendance()
+      getAttendanceByDate(selectedDate)
     ])
     setMembers(membersData)
-    setTodayLogs(logsData)
+    setDailyLogs(logsData)
     setLoading(false)
-  }
+  }, [selectedDate])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleMarkPresent = async (userId: string) => {
-    const res = await markAttendance(userId)
+    const res = await markAttendance(userId, selectedDate)
     if (res.success) {
       toast.success('Attendance marked!')
       fetchData() // Refresh logs
@@ -38,44 +44,88 @@ export default function AttendancePage() {
   }
 
   const isCheckedIn = (userId: string) => {
-    return todayLogs.some(log => log.userId === userId)
+    return dailyLogs.some(log => log.userId === userId)
   }
 
-  const filteredMembers = members.filter(m => 
+  // Filter by search term first
+  let filteredMembers = members.filter(m => 
     m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     m.profile?.phone?.includes(searchTerm)
   )
+
+  // Then filter by active tab
+  if (activeTab === 'PRESENT') {
+    filteredMembers = filteredMembers.filter(m => isCheckedIn(m.id))
+  } else if (activeTab === 'ABSENT') {
+    filteredMembers = filteredMembers.filter(m => !isCheckedIn(m.id))
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Daily Attendance</h1>
-          <p className="text-zinc-400 text-sm mt-1">Mark member check-ins for today: {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          <p className="text-zinc-400 text-sm mt-1">Track check-ins and member activity</p>
+        </div>
+        
+        {/* Date Picker */}
+        <div className="flex items-center gap-3 bg-zinc-900 border border-white/5 rounded-xl px-4 py-2">
+          <Calendar className="w-5 h-5 text-brand-gold" />
+          <input 
+            type="date" 
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="bg-transparent text-white focus:outline-none [&::-webkit-calendar-picker-indicator]:invert"
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Side: Search & Mark Attendance */}
+        {/* Left Side: Search, Tabs & Members List */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
-            <div className="relative w-full mb-6">
-              <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
-              <input 
-                type="text" 
-                placeholder="Search member by name or phone..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-zinc-950 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-brand-gold"
-              />
+            
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="relative w-full flex-1">
+                <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+                <input 
+                  type="text" 
+                  placeholder="Search member by name or phone..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-zinc-950 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-brand-gold"
+                />
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-2 mb-6 p-1 bg-zinc-950/50 rounded-lg w-fit border border-white/5">
+              <button 
+                onClick={() => setActiveTab('ALL')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'ALL' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-400 hover:text-white'}`}
+              >
+                <Users className="w-4 h-4" /> All
+              </button>
+              <button 
+                onClick={() => setActiveTab('PRESENT')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'PRESENT' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'text-zinc-400 hover:text-green-400'}`}
+              >
+                <UserCheck className="w-4 h-4" /> Present
+              </button>
+              <button 
+                onClick={() => setActiveTab('ABSENT')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition-all ${activeTab === 'ABSENT' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'text-zinc-400 hover:text-red-400'}`}
+              >
+                <UserX className="w-4 h-4" /> Absent
+              </button>
             </div>
 
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
               {loading ? (
                 <div className="text-center text-zinc-500 py-10">Loading members...</div>
               ) : filteredMembers.length === 0 ? (
-                <div className="text-center text-zinc-500 py-10">No members found.</div>
+                <div className="text-center text-zinc-500 py-10">No members found for this category.</div>
               ) : (
                 filteredMembers.map(member => (
                   <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border border-white/5 bg-zinc-950/50 hover:bg-white/[0.02] transition-colors">
@@ -103,14 +153,14 @@ export default function AttendancePage() {
           </div>
         </div>
 
-        {/* Right Side: Today's Log */}
+        {/* Right Side: Log for Selected Date */}
         <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 h-fit">
           <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-brand-gold" /> Today's Log
+            <Clock className="w-5 h-5 text-brand-gold" /> Logs for {new Date(selectedDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
           </h2>
           <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
             <div>
-              <p className="text-3xl font-bold text-white">{todayLogs.length}</p>
+              <p className="text-3xl font-bold text-white">{dailyLogs.length}</p>
               <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Check-ins</p>
             </div>
             <div className="w-12 h-12 rounded-full bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center">
@@ -119,10 +169,10 @@ export default function AttendancePage() {
           </div>
           
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-            {todayLogs.length === 0 ? (
-              <p className="text-sm text-zinc-500 text-center py-4">No check-ins yet today.</p>
+            {dailyLogs.length === 0 ? (
+              <p className="text-sm text-zinc-500 text-center py-4">No check-ins on this date.</p>
             ) : (
-              todayLogs.map(log => (
+              dailyLogs.map(log => (
                 <div key={log.id} className="flex justify-between items-center">
                   <div className="truncate">
                     <p className="text-sm font-medium text-white truncate">{log.user?.name}</p>
