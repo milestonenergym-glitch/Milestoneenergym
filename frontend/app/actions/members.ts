@@ -158,9 +158,9 @@ export async function updateMemberProfile(userId: string, data: any) {
         name,
         email,
         profile: {
-          update: {
-            phone,
-            ...profileData
+          upsert: {
+            create: { phone, ...profileData },
+            update: { phone, ...profileData }
           }
         }
       }
