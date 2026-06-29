@@ -594,7 +594,9 @@ export default function PremiumRegistrationForm({
           
           {/* HEADER */}
           <div className="header">
-            <div className="logo-box">ME</div>
+            <div className="logo-box" style={{ padding: '2px', background: 'var(--white)' }}>
+              <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '10px' }} />
+            </div>
             <div className="brand">
               <h1>MILESTONE <span>ENERGYM</span></h1>
               <p>नवलाराम की चक्की, Near Crown Plaza, NH68<br/>जैसलमेर रोड बाड़मेर, Barmer, Rajasthan – 344001</p>
