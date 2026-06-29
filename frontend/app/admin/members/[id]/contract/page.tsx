@@ -172,14 +172,12 @@ export default async function MemberContractPage({
         .pdf-page-wrapper .sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
         /* ── INFO GRID ── */
-        .pdf-page-wrapper .info-grid { display: grid; gap: 0; }
+        .pdf-page-wrapper .info-grid { display: flex; flex-direction: column; }
         .pdf-page-wrapper .info-row {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          display: flex;
           border-bottom: 1px solid var(--border);
         }
-        .pdf-page-wrapper .info-row.three { grid-template-columns: repeat(3, 1fr); }
-        .pdf-page-wrapper .info-row.full  { grid-template-columns: 1fr; }
+        .pdf-page-wrapper .info-row .info-cell { flex: 1; }
         .pdf-page-wrapper .info-row:last-child { border-bottom: none; }
 
         .pdf-page-wrapper .info-cell {
@@ -282,11 +280,11 @@ export default async function MemberContractPage({
 
         /* ── SIGNATURE AREA ── */
         .pdf-page-wrapper .sig-area {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
+          display: flex;
           gap: 32px;
           margin-top: 10px;
         }
+        .pdf-page-wrapper .sig-block { flex: 1; }
         .pdf-page-wrapper .sig-block .sig-lbl {
           font-size: 8.5px;
           font-weight: 700;
