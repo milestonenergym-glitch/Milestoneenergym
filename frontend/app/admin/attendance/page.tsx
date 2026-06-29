@@ -47,11 +47,30 @@ export default function AttendancePage() {
     return dailyLogs.some(log => log.userId === userId)
   }
 
+  const hasActiveMembershipOnDate = (member: any, dateStr: string) => {
+    if (!member.memberships || member.memberships.length === 0) return false
+    
+    const targetDate = new Date(dateStr)
+    targetDate.setHours(0,0,0,0)
+
+    return member.memberships.some((membership: any) => {
+      const start = new Date(membership.startDate)
+      start.setHours(0,0,0,0)
+      const end = new Date(membership.endDate)
+      end.setHours(23,59,59,999)
+      
+      return targetDate >= start && targetDate <= end
+    })
+  }
+
   // Filter by search term first
   let filteredMembers = members.filter(m => 
     m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     m.profile?.phone?.includes(searchTerm)
   )
+
+  // Only show members who had an active membership on the selected date
+  filteredMembers = filteredMembers.filter(m => hasActiveMembershipOnDate(m, selectedDate))
 
   // Then filter by active tab
   if (activeTab === 'PRESENT') {
