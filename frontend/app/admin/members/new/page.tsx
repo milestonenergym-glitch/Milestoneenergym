@@ -1,5 +1,7 @@
 import PremiumRegistrationForm from '@/components/PremiumRegistrationForm'
+import { getPlans } from '@/app/actions/plans'
 
-export default function NewMemberPage() {
-  return <PremiumRegistrationForm isAdmin={true} />
+export default async function NewMemberPage() {
+  const plans = await getPlans()
+  return <PremiumRegistrationForm isAdmin={true} dbPlans={plans} />
 }

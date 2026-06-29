@@ -8,10 +8,12 @@ import { markLinkAsUsed } from '@/app/actions/registration-links'
 
 export default function PremiumRegistrationForm({ 
   token, 
-  isAdmin 
+  isAdmin,
+  dbPlans = []
 }: { 
   token?: string, 
-  isAdmin?: boolean 
+  isAdmin?: boolean,
+  dbPlans?: any[]
 }) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,44 +21,57 @@ export default function PremiumRegistrationForm({
   const [successMemberId, setSuccessMemberId] = useState('')
   
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split('T')[0])
-  const [selectedPlan, setSelectedPlan] = useState('') // "Monthly|999" format
-  const [amountPaid, setAmountPaid] = useState('')
-  const [payMode, setPayMode] = useState('Cash')
+  const [selectedPlanType, setSelectedPlanType] = useState<'db' | 'custom' | ''>('')
+  const [selectedDbPlan, setSelectedDbPlan] = useState<any>(null) // full plan object from DB
+  const [customMonths, setCustomMonths] = useState('')
+  const [amountPaid, setAmountPaid] = useState('')   // actual amount (for admin dashboard)
+  const [pdfAmount, setPdfAmount] = useState('')     // PDF/contract display amount
+  const [payMode, setPayMode] = useState('CASH')
   const [endDate, setEndDate] = useState('')
 
-  const planDuration: Record<string, number> = { 
-    'Monthly|999': 1, 
-    'Quarterly|2699': 3, 
-    'Half-Yearly|4999': 6, 
-    'Yearly|10999': 12, 
-    'Personal Training|1999': 1 
-  }
-
+  // Recalculate end date whenever start date, plan or custom months change
   useEffect(() => {
-    if (!startDate || !selectedPlan) {
-      setEndDate('')
-      return
+    if (!startDate) { setEndDate(''); return }
+    let months = 0
+    if (selectedPlanType === 'db' && selectedDbPlan) {
+      // Use durationInDays if available, else derive from plan name patterns
+      months = selectedDbPlan.durationInDays ? Math.round(selectedDbPlan.durationInDays / 30) : 1
+    } else if (selectedPlanType === 'custom' && customMonths) {
+      months = parseInt(customMonths, 10)
     }
-    const months = planDuration[selectedPlan] || 1
-    const end = new Date(startDate)
-    end.setMonth(end.getMonth() + months)
-    setEndDate(end.toISOString().split('T')[0])
-  }, [startDate, selectedPlan])
+    if (months > 0) {
+      const end = new Date(startDate)
+      end.setDate(end.getDate() + (months * 30))
+      setEndDate(end.toISOString().split('T')[0])
+    } else {
+      setEndDate('')
+    }
+  }, [startDate, selectedPlanType, selectedDbPlan, customMonths])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     
-    if (!selectedPlan) {
+    if (selectedPlanType === '') {
       toast.error('Please select a Membership Plan.')
+      return
+    }
+    if (selectedPlanType === 'custom' && !customMonths) {
+      toast.error('Please select a custom duration.')
       return
     }
     
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
     
-    // Extract plan info
-    const planName = selectedPlan.split('|')[0] // 'Monthly', 'Quarterly' etc.
-    const durationMonths = planDuration[selectedPlan] || 1
+    // Determine plan details
+    let durationMonths = 1
+    let planId: string | undefined = undefined
+    if (selectedPlanType === 'db' && selectedDbPlan) {
+      planId = selectedDbPlan.id
+      durationMonths = selectedDbPlan.durationInDays ? Math.round(selectedDbPlan.durationInDays / 30) : 1
+    } else if (selectedPlanType === 'custom') {
+      durationMonths = parseInt(customMonths, 10)
+    }
 
     const data = {
       name: formData.get('fullName'),
@@ -69,10 +84,11 @@ export default function PremiumRegistrationForm({
       emergencyContact: formData.get('emergName'),
       emergencyContactPhone: formData.get('emergPhone'),
       medicalConditions: formData.get('medical'),
-      // map to what createMember expects
-      durationMonths: durationMonths,
+      planId,
+      durationMonths,
       startDate: new Date(startDate),
-      amountPaid: Number(amountPaid),
+      amountPaid: Number(amountPaid) || 0,
+      pdfAmount: pdfAmount ? Number(pdfAmount) : null,
       paymentMode: payMode,
     }
 
@@ -664,33 +680,71 @@ export default function PremiumRegistrationForm({
               {/* MEMBERSHIP PLAN */}
               <div className="section">
                 <div className="section-label"><div className="dot"></div><span>Membership Plan</span></div>
-                <div className="plan-grid">
-                  {[
-                    { name: 'Monthly', key: 'Monthly|999', price: '₹999', suffix: '/ mo' },
-                    { name: 'Quarterly', key: 'Quarterly|2699', price: '₹2,699', suffix: '/ 3mo' },
-                    { name: 'Half-Yearly', key: 'Half-Yearly|4999', price: '₹4,999', suffix: '/ 6mo' },
-                    { name: 'Yearly', key: 'Yearly|10999', price: '₹10,999', suffix: '/ yr' },
-                    { name: 'Personal Training', key: 'Personal Training|1999', price: '₹1,999', suffix: '/ mo' },
-                  ].map((plan) => (
-                    <label 
-                      key={plan.key} 
-                      className={`plan-card ${selectedPlan === plan.key ? 'selected' : ''}`}
-                    >
-                      <input 
-                        type="radio" 
-                        name="plan" 
-                        value={plan.key}
-                        checked={selectedPlan === plan.key}
-                        onChange={(e) => {
-                          setSelectedPlan(e.target.value)
-                          setAmountPaid(e.target.value.split('|')[1])
-                        }}
-                      />
-                      <div className="plan-name">{plan.name}</div>
-                      <div className="plan-price">{plan.price} <span>{plan.suffix}</span></div>
-                      <div className="checkmark">✅</div>
-                    </label>
-                  ))}
+                
+                {/* DB Plans as cards */}
+                {dbPlans.length > 0 && (
+                  <>
+                    <div style={{fontSize:'11px', fontWeight:700, color:'#6B7A99', textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:'10px'}}>Standard Plans</div>
+                    <div className="plan-grid" style={{marginBottom:'16px'}}>
+                      {dbPlans.filter(p => p.isActive !== false).map((plan) => (
+                        <label 
+                          key={plan.id} 
+                          className={`plan-card ${selectedPlanType === 'db' && selectedDbPlan?.id === plan.id ? 'selected' : ''}`}
+                        >
+                          <input 
+                            type="radio" 
+                            name="planSelection" 
+                            value={plan.id}
+                            checked={selectedPlanType === 'db' && selectedDbPlan?.id === plan.id}
+                            onChange={() => {
+                              setSelectedPlanType('db')
+                              setSelectedDbPlan(plan)
+                              setAmountPaid(String(plan.price))
+                              setPdfAmount(String(plan.price))
+                              setCustomMonths('')
+                            }}
+                          />
+                          <div className="plan-name">{plan.name}</div>
+                          <div className="plan-price">₹{plan.price?.toLocaleString('en-IN')} <span>/ {plan.durationInDays} days</span></div>
+                          <div className="checkmark">✅</div>
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Custom 1–15 month option */}
+                <div style={{fontSize:'11px', fontWeight:700, color:'#6B7A99', textTransform:'uppercase', letterSpacing:'1.2px', marginBottom:'10px', marginTop:'4px'}}>Custom Duration</div>
+                <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+                  <label className={`plan-card ${selectedPlanType === 'custom' ? 'selected' : ''}`} style={{flex: 1, textAlign:'left', display:'flex', alignItems:'center', gap:'12px', padding:'12px 16px'}}>
+                    <input 
+                      type="radio" 
+                      name="planSelection" 
+                      value="custom"
+                      checked={selectedPlanType === 'custom'}
+                      onChange={() => {
+                        setSelectedPlanType('custom')
+                        setSelectedDbPlan(null)
+                        setAmountPaid('')
+                        setPdfAmount('')
+                      }}
+                    />
+                    <div>
+                      <div className="plan-name" style={{margin:0, textAlign:'left'}}>Custom Duration</div>
+                      <div style={{fontSize:'12px', color:'#6B7A99', marginTop:'2px'}}>1 – 15 Months</div>
+                    </div>
+                    <div className="checkmark" style={{position:'static', marginLeft:'auto'}}>✅</div>
+                  </label>
+                  {selectedPlanType === 'custom' && (
+                    <div className="field" style={{marginBottom:0, minWidth:'160px'}}>
+                      <select value={customMonths} onChange={e => setCustomMonths(e.target.value)} required={selectedPlanType === 'custom'}>
+                        <option value="">Select months...</option>
+                        {[...Array(15)].map((_, i) => (
+                          <option key={i+1} value={String(i+1)}>{i+1} Month{i+1 > 1 ? 's' : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -703,16 +757,16 @@ export default function PremiumRegistrationForm({
                     <input type="date" name="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
                   </div>
                   <div className="field">
-                    <label>End Date</label>
+                    <label>End Date (Auto)</label>
                     <input type="date" name="endDate" value={endDate} readOnly style={{background: '#F0F4FF', color: '#4566B0', cursor: 'not-allowed'}} />
                   </div>
                   <div className="field">
-                    <label>Amount Paid (₹) <span className="req">*</span></label>
-                    <input type="number" name="amountPaid" placeholder="Auto-fills on plan select" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
+                    <label>Actual Amount Paid (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(for admin records)</span></label>
+                    <input type="number" name="amountPaid" placeholder="e.g. 999" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
                   </div>
                   <div className="field">
-                    <label>Receipt / Reference No.</label>
-                    <input type="text" name="receiptNo" placeholder="e.g. RCP20260629001" />
+                    <label>PDF / Contract Amount (₹) <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(shown on PDF)</span></label>
+                    <input type="number" name="pdfAmount" placeholder="Leave blank to use actual" value={pdfAmount} onChange={(e) => setPdfAmount(e.target.value)} />
                   </div>
                 </div>
                 <div className="field" style={{marginBottom: 0}}>

@@ -8,7 +8,8 @@ const prisma = new PrismaClient()
 
 export async function generateRegistrationLink() {
   try {
-    const token = randomBytes(16).toString('hex')
+    const uniquePart = randomBytes(8).toString('hex')
+    const token = `Milestoneenergym_fill_membership_plan_${uniquePart}`
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000) // 30 mins
 
     await prisma.registrationLink.create({

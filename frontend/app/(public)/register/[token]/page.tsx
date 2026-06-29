@@ -1,4 +1,5 @@
 import { getRegistrationLink } from '@/app/actions/registration-links'
+import { getPlans } from '@/app/actions/plans'
 import { Dumbbell, XCircle, Clock } from 'lucide-react'
 import PremiumRegistrationForm from '@/components/PremiumRegistrationForm'
 
@@ -6,7 +7,10 @@ export default async function RegisterPage({ params }: { params: Promise<{ token
   const resolvedParams = await params
   const token = resolvedParams.token
   
-  const link = await getRegistrationLink(token)
+  const [link, plans] = await Promise.all([
+    getRegistrationLink(token),
+    getPlans()
+  ])
   
   if (!link) {
     return (
@@ -40,5 +44,5 @@ export default async function RegisterPage({ params }: { params: Promise<{ token
     )
   }
 
-  return <PremiumRegistrationForm token={token} />
+  return <PremiumRegistrationForm token={token} dbPlans={plans} />
 }
