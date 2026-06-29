@@ -131,11 +131,28 @@ export default function MembersPage() {
     setEditingMember(member)
     setIsEditModalOpen(true)
     setIsRenewing(false)
-    setAssignDurationMonths('')
-    setAssignStartDate(new Date().toISOString().split('T')[0])
-    setAssignActualAmount('')
-    setAssignPdfAmount('')
-    setAssignPaymentMode('CASH')
+    // Pre-fill existing plan data so admin can directly edit it
+    const existing = member.memberships?.[0]
+    if (existing) {
+      const startD = existing.startDate ? new Date(existing.startDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      const endD = existing.endDate ? new Date(existing.endDate).toISOString().split('T')[0] : ''
+      const durationDays = existing.startDate && existing.endDate
+        ? Math.round((new Date(existing.endDate).getTime() - new Date(existing.startDate).getTime()) / (1000 * 60 * 60 * 24 * 30))
+        : 1
+      setAssignDurationMonths(String(durationDays || 1))
+      setAssignStartDate(startD)
+      setAssignEndDate(endD)
+      setAssignActualAmount(String(existing.amountPaid ?? ''))
+      setAssignPdfAmount(String(existing.pdfAmount ?? ''))
+      setAssignPaymentMode(existing.paymentMode || 'CASH')
+    } else {
+      setAssignDurationMonths('')
+      setAssignStartDate(new Date().toISOString().split('T')[0])
+      setAssignEndDate('')
+      setAssignActualAmount('')
+      setAssignPdfAmount('')
+      setAssignPaymentMode('CASH')
+    }
   }
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -618,105 +635,96 @@ export default function MembersPage() {
                 </button>
               </div>
 
-              {editingMember.memberships?.length > 0 && !isRenewing ? (
-                <div className="bg-brand-gold/10 border border-brand-gold/20 p-4 rounded-xl">
-                  <p className="text-brand-gold mb-2 font-semibold">Active Plan Exists</p>
-                  <p className="text-sm text-zinc-400 mb-4">This member already has an active plan: {editingMember.memberships[0].plan.name}.</p>
-                  <button 
-                    onClick={() => {
-                      setIsRenewing(true);
-                      const lastEndDate = new Date(editingMember.memberships[0].endDate);
-                      setAssignStartDate(lastEndDate.toISOString().split('T')[0]);
-                    }}
-                    className="w-full bg-brand-gold text-black font-bold py-2 rounded-lg hover:bg-brand-gold/90 transition-colors"
+              {/* Always show the full plan edit form — pre-filled with existing data if plan exists */}
+              <form onSubmit={handleAssignPlan} className="space-y-4">
+                {editingMember?.memberships?.length > 0 && (
+                  <div className="bg-brand-gold/10 border border-brand-gold/20 p-3 rounded-xl">
+                    <p className="text-brand-gold text-sm font-semibold">✏️ Editing Existing Plan: {editingMember.memberships[0].plan?.name || 'Custom'}</p>
+                    <p className="text-zinc-400 text-xs mt-1">Changes will update the current plan. Fill new values to reassign.</p>
+                  </div>
+                )}
+                {editingMember?.profile?.requestedDuration && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-amber-500 text-sm">
+                    <strong>Note:</strong> Customer requested <strong>{editingMember.profile.requestedDuration}</strong> via WhatsApp registration.
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Duration (Months)</label>
+                  <select 
+                    value={assignDurationMonths} 
+                    onChange={(e) => setAssignDurationMonths(e.target.value)}
+                    required 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
                   >
-                    Renew / Extend Plan
-                  </button>
+                    <option value="">Select duration...</option>
+                    {[...Array(15)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1} Month{i + 1 > 1 ? 's' : ''}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ) : (
-                <form onSubmit={handleAssignPlan} className="space-y-4">
-                  {editingMember.profile?.requestedDuration && (
-                    <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-amber-500 text-sm">
-                      <strong>Note:</strong> Customer requested <strong>{editingMember.profile.requestedDuration}</strong> via WhatsApp registration.
-                    </div>
-                  )}
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm text-zinc-400">Duration (Months)</label>
-                    <select 
-                      value={assignDurationMonths} 
-                      onChange={(e) => setAssignDurationMonths(e.target.value)}
+                    <label className="text-sm text-zinc-400">Start Date</label>
+                    <input 
+                      type="date" 
+                      value={assignStartDate}
+                      onChange={(e) => setAssignStartDate(e.target.value)}
                       required 
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
-                    >
-                      <option value="">Select duration...</option>
-                      {[...Array(15)].map((_, i) => (
-                        <option key={i + 1} value={i + 1}>
-                          {i + 1} Month{i + 1 > 1 ? 's' : ''}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">Start Date</label>
-                      <input 
-                        type="date" 
-                        value={assignStartDate}
-                        onChange={(e) => setAssignStartDate(e.target.value)}
-                        required 
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">End Date</label>
-                      <input 
-                        type="date" 
-                        value={assignEndDate}
-                        readOnly
-                        className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed" 
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">Actual Amount (₹) <span className="text-xs text-zinc-500">(For System)</span></label>
-                      <input 
-                        type="number" 
-                        value={assignActualAmount}
-                        onChange={(e) => setAssignActualAmount(e.target.value)}
-                        placeholder="e.g. 5000"
-                        required 
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm text-zinc-400">PDF Amount (₹) <span className="text-xs text-zinc-500">(Optional)</span></label>
-                      <input 
-                        type="number" 
-                        value={assignPdfAmount}
-                        onChange={(e) => setAssignPdfAmount(e.target.value)}
-                        placeholder="e.g. 6000"
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
-                      />
-                    </div>
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                    />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm text-zinc-400">Mode of Payment</label>
-                    <select 
-                      value={assignPaymentMode} 
-                      onChange={(e) => setAssignPaymentMode(e.target.value)}
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
-                    >
-                      <option value="CASH">Cash</option>
-                      <option value="UPI">UPI</option>
-                      <option value="CARD">Card</option>
-                    </select>
+                    <label className="text-sm text-zinc-400">End Date (Auto)</label>
+                    <input 
+                      type="date" 
+                      value={assignEndDate}
+                      readOnly
+                      className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-3 text-zinc-500 cursor-not-allowed" 
+                    />
                   </div>
-                  <button type="submit" disabled={isSubmitting || !assignDurationMonths} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
-                    {isSubmitting ? 'Assigning...' : 'Assign Plan & Mark Paid'}
-                  </button>
-                </form>
-              )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">Actual Amount (₹) <span className="text-xs text-zinc-500">(For System)</span></label>
+                    <input 
+                      type="number" 
+                      value={assignActualAmount}
+                      onChange={(e) => setAssignActualAmount(e.target.value)}
+                      placeholder="e.g. 5000"
+                      required 
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-zinc-400">PDF Amount (₹) <span className="text-xs text-zinc-500">(Optional)</span></label>
+                    <input 
+                      type="number" 
+                      value={assignPdfAmount}
+                      onChange={(e) => setAssignPdfAmount(e.target.value)}
+                      placeholder="e.g. 6000"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Mode of Payment</label>
+                  <select 
+                    value={assignPaymentMode} 
+                    onChange={(e) => setAssignPaymentMode(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="CARD">Card</option>
+                    <option value="BANK">Bank Transfer</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isSubmitting || !assignDurationMonths} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
+                  {isSubmitting ? 'Saving...' : editingMember?.memberships?.length > 0 ? '💾 Update Plan & Payment' : '✅ Assign Plan & Mark Paid'}
+                </button>
+              </form>
             </div>
           </motion.div>
         </div>
