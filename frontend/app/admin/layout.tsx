@@ -221,8 +221,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-zinc-950 p-4 sm:p-6 lg:p-8 scrollbar-hide">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto bg-zinc-950 print:bg-white p-4 sm:p-6 lg:p-8 print:p-0 scrollbar-hide">
+          <div className="max-w-7xl mx-auto print:max-w-none print:mx-0">
             {children}
           </div>
         </main>

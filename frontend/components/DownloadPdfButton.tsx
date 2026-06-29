@@ -30,16 +30,21 @@ export default function DownloadPdfButton({
     }
   }, [autoDownload])
 
+  const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `Milestone_Contract_${sequentialId}_${memberName.replace(/\s+/g, '_')}`;
+    window.print();
+    document.title = originalTitle;
+  }
+
   const handleDownload = async () => {
     if (isDownloading) return;
 
     try {
       setIsDownloading(true)
       
-      // Scroll to top before capturing to prevent blank canvas bug in html2canvas
       window.scrollTo(0, 0);
 
-      // Safely import html2pdf for both ESM and CJS
       const html2pdfModule = await import('html2pdf.js')
       const html2pdf = html2pdfModule.default || (html2pdfModule as any)
       
@@ -67,11 +72,17 @@ export default function DownloadPdfButton({
   }
 
   return (
-    <div className="mt-12 text-center print:hidden" data-html2canvas-ignore="true">
+    <div className="mt-12 text-center print:hidden flex justify-center gap-4" data-html2canvas-ignore="true">
+      <button 
+        onClick={handlePrint}
+        className="bg-zinc-800 text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-zinc-700 transition-colors cursor-pointer"
+      >
+        Print
+      </button>
       <button 
         onClick={handleDownload}
         disabled={isDownloading}
-        className="bg-black text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
+        className="bg-black text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-gray-900 transition-colors cursor-pointer disabled:opacity-50"
       >
         {isDownloading ? 'Generating PDF...' : 'Download PDF'}
       </button>
