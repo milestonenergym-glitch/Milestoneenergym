@@ -56,7 +56,7 @@ export default function DownloadPdfButton({
       await html2pdf().set(opt).from(element).save()
     } catch (error) {
       console.error("Failed to generate PDF", error)
-      alert("Failed to download PDF. Please try again.")
+      alert("Failed to download PDF: " + (error instanceof Error ? error.message : String(error)))
     } finally {
       setIsDownloading(false)
     }
