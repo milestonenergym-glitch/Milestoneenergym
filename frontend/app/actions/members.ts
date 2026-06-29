@@ -390,3 +390,17 @@ export async function settleDues(membershipId: string, amountToPay: number, paym
     return { success: false, error: 'Failed to settle dues' }
   }
 }
+
+export async function deleteMember(userId: string) {
+  try {
+    await prisma.user.delete({
+      where: { id: userId }
+    })
+    
+    revalidatePath('/admin/members')
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete member:', error)
+    return { success: false, error: 'Failed to delete member' }
+  }
+}

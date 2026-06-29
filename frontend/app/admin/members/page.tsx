@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getMembers, createMember, updateMemberProfile, assignMembershipToMember, settleDues } from '@/app/actions/members'
+import { getMembers, createMember, updateMemberProfile, assignMembershipToMember, settleDues, deleteMember } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
 import { generateRegistrationLink } from '@/app/actions/registration-links'
-import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2, Download } from 'lucide-react'
+import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2, Download, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -228,6 +228,19 @@ export default function MembersPage() {
     setIsSubmitting(false)
   }
 
+  const handleDeleteMember = async (memberId: string, memberName: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete ${memberName || 'this member'}? This will also remove all their memberships, payments, and profile data. This action cannot be undone.`)) {
+      return
+    }
+    const res = await deleteMember(memberId)
+    if (res.success) {
+      toast.success('Member deleted permanently!')
+      fetchData()
+    } else {
+      toast.error(res.error || 'Failed to delete member')
+    }
+  }
+
   const getMembershipStatus = (member: any) => {
     if (!member.memberships || member.memberships.length === 0) {
       if (member.profile?.requestedDuration) {
@@ -383,6 +396,13 @@ export default function MembersPage() {
                         title="Edit Member"
                       >
                         <FileEdit className="w-4 h-4" />
+                      </button>
+                      <button  
+                        onClick={() => handleDeleteMember(member.id, member.name)}
+                        className="text-zinc-500 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-white/5"
+                        title="Delete Member Permanently"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
