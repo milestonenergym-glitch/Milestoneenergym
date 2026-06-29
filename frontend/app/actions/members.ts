@@ -64,14 +64,14 @@ export async function getMemberSequentialId(createdAt: Date) {
 
 export async function createMember(data: any) {
   try {
-    const { name, email, phone, planId, durationMonths, durationInDays, amountPaid, pdfAmount, paymentMode, ...profileData } = data
+    const { name, email, phone, planId, durationMonths, durationInDays, amountPaid, pdfAmount, paymentMode, startDate, ...profileData } = data
 
     // Create User, Profile, and initial Membership in a transaction
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
           name,
-          email,
+          email: email || undefined,
           role: 'MEMBER',
           profile: {
             create: {
