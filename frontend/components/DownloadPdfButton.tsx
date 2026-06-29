@@ -20,20 +20,23 @@ export default function DownloadPdfButton({
     let timeoutId: NodeJS.Timeout;
 
     if (autoDownload && mounted) {
+      // Delay so fonts/images fully load before capturing
       timeoutId = setTimeout(() => {
         handleDownload()
-      }, 800)
+      }, 1200)
     } else if (autoPrint && mounted) {
+      // Give the page time to fully render before triggering print
       timeoutId = setTimeout(() => {
         handlePrint()
-      }, 800)
+      }, 1200)
     }
 
     return () => {
       mounted = false;
       if (timeoutId) clearTimeout(timeoutId);
     }
-  }, [autoDownload, autoPrint])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handlePrint = () => {
     const originalTitle = document.title;

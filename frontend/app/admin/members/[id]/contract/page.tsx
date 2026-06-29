@@ -1,7 +1,7 @@
 import { getMemberById, getMemberSequentialId } from '@/app/actions/members'
 import { getGymSettings } from '@/app/actions/settings'
 import { notFound } from 'next/navigation'
-import DownloadPdfButton from '@/components/DownloadPdfButton'
+import PrintTrigger from '@/components/PrintTrigger'
 
 export default async function MemberContractPage({ 
   params,
@@ -32,12 +32,28 @@ export default async function MemberContractPage({
     return new Date(d).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'})
   }
 
+  const autoPrint = resolvedSearchParams?.print === 'true'
+  const autoDownload = resolvedSearchParams?.download === 'true'
+  const filename = `Milestone_Contract_${sequentialId}_${(member.name || 'Member').replace(/\s+/g, '_')}`
+
   return (
     <>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+
+      {/* Auto-trigger: print or download on load */}
+      <PrintTrigger 
+        autoPrint={autoPrint} 
+        autoDownload={autoDownload}
+        filename={filename}
+        sequentialId={sequentialId}
+        memberName={member.name || 'Member'}
+      />
+
       <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap');
-        
-        .pdf-page-wrapper {
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
           --navy:  #0B1F4B;
           --blue:  #1A4BD4;
           --gold:  #E6A817;
@@ -46,29 +62,44 @@ export default async function MemberContractPage({
           --border:#D0D9ED;
           --text:  #1C2640;
           --muted: #6B7A99;
-          
           font-family: 'Barlow', Arial, sans-serif;
           background: #e8ecf4;
+          color: #1C2640;
+        }
+
+        .page-wrap {
           padding: 24px 16px 48px;
-          color: var(--text);
           min-height: 100vh;
         }
 
-        .pdf-page-wrapper * { box-sizing: border-box; }
-
-        /* Print button bar — hidden in PDF */
-        .pdf-page-wrapper .print-bar {
+        /* Print button bar — hidden when printing */
+        .print-bar {
           max-width: 794px;
           margin: 0 auto 16px;
           display: flex;
           gap: 10px;
           justify-content: flex-end;
         }
+        .print-bar button {
+          padding: 10px 28px;
+          font-family: 'Barlow', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+        .print-bar button:hover { opacity: 0.85; }
+        .btn-print { background: #1C2640; color: #fff; }
+        .btn-download { background: #E6A817; color: #1C2640; }
 
         /* ═══════════════════════════════════════════
            A4 PAGE WRAPPER
         ═══════════════════════════════════════════ */
-        .pdf-page-wrapper .a4-page {
+        .a4-page {
           width: 794px;
           min-height: 1123px;
           margin: 0 auto;
@@ -80,33 +111,33 @@ export default async function MemberContractPage({
         }
 
         /* ── TOP ACCENT BAR ── */
-        .pdf-page-wrapper .accent-bar {
+        .accent-bar {
           height: 6px;
-          background: linear-gradient(90deg, var(--gold) 0%, #F5C842 40%, var(--blue) 100%);
+          background: linear-gradient(90deg, #E6A817 0%, #F5C842 40%, #1A4BD4 100%);
         }
 
         /* ── HEADER ── */
-        .pdf-page-wrapper .header {
-          background: var(--navy);
+        .header {
+          background: #0B1F4B;
           padding: 22px 40px 18px;
           display: flex;
           align-items: flex-start;
           gap: 18px;
         }
-        .pdf-page-wrapper .logo-box {
+        .logo-box {
           width: 64px; height: 64px;
-          background: var(--gold);
+          background: #E6A817;
           border-radius: 10px;
           display: flex; align-items: center; justify-content: center;
           font-family: 'Barlow Condensed', sans-serif;
           font-weight: 800; font-size: 18px;
-          color: var(--navy);
+          color: #0B1F4B;
           flex-shrink: 0;
           letter-spacing: -1px;
           overflow: hidden;
         }
-        .pdf-page-wrapper .brand { flex: 1; }
-        .pdf-page-wrapper .brand h1 {
+        .brand { flex: 1; }
+        .brand h1 {
           font-family: 'Barlow Condensed', sans-serif;
           font-weight: 800;
           font-size: 26px;
@@ -116,113 +147,103 @@ export default async function MemberContractPage({
           line-height: 1;
           margin: 0;
         }
-        .pdf-page-wrapper .brand h1 span { color: var(--gold); }
-        .pdf-page-wrapper .brand .addr {
+        .brand h1 span { color: #E6A817; }
+        .brand .addr {
           font-size: 10.5px;
           color: rgba(255,255,255,.55);
           margin-top: 5px;
           line-height: 1.55;
         }
-        .pdf-page-wrapper .header-right { text-align: right; flex-shrink: 0; }
-        .pdf-page-wrapper .header-right .doc-title {
+        .header-right { text-align: right; flex-shrink: 0; }
+        .header-right .doc-title {
           font-size: 11px;
           font-weight: 700;
-          color: var(--gold);
+          color: #E6A817;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 4px;
         }
-        .pdf-page-wrapper .header-right .date-badge {
+        .date-badge {
           background: rgba(255,255,255,.1);
           border: 1px solid rgba(255,255,255,.2);
           border-radius: 6px;
           padding: 5px 12px;
           display: inline-block;
         }
-        .pdf-page-wrapper .header-right .date-badge .lbl { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .8px; }
-        .pdf-page-wrapper .header-right .date-badge .val { font-size: 13px; font-weight: 700; color: #fff; }
-        .pdf-page-wrapper .header-right .member-id-box { margin-top: 8px; }
-        .pdf-page-wrapper .header-right .member-id-box .lbl { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .8px; }
-        .pdf-page-wrapper .header-right .member-id-box .val { font-size: 12px; font-weight: 800; color: var(--gold); letter-spacing: .5px; }
+        .date-badge .lbl { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .8px; }
+        .date-badge .val { font-size: 13px; font-weight: 700; color: #fff; }
+        .member-id-box { margin-top: 8px; }
+        .member-id-box .lbl { font-size: 9px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .8px; }
+        .member-id-box .val { font-size: 12px; font-weight: 800; color: #E6A817; letter-spacing: .5px; }
 
         /* ── GOLD DIVIDER ── */
-        .pdf-page-wrapper .gold-bar {
+        .gold-bar {
           height: 3px;
-          background: linear-gradient(90deg, var(--gold) 0%, transparent 80%);
+          background: linear-gradient(90deg, #E6A817 0%, transparent 80%);
         }
 
         /* ── BODY ── */
-        .pdf-page-wrapper .body { padding: 24px 40px 30px; }
+        .body { padding: 24px 40px 30px; }
 
         /* ── SECTION HEADING ── */
-        .pdf-page-wrapper .sec-head {
+        .sec-head {
           display: flex;
           align-items: center;
           gap: 10px;
           margin: 18px 0 12px;
         }
-        .pdf-page-wrapper .sec-head .bar { width: 4px; height: 16px; background: var(--gold); border-radius: 2px; flex-shrink: 0; }
-        .pdf-page-wrapper .sec-head span {
+        .sec-head .bar { width: 4px; height: 16px; background: #E6A817; border-radius: 2px; flex-shrink: 0; }
+        .sec-head span {
           font-size: 10px;
           font-weight: 800;
-          color: var(--blue);
+          color: #1A4BD4;
           text-transform: uppercase;
           letter-spacing: 2px;
         }
-        .pdf-page-wrapper .sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .sec-head::after { content: ''; flex: 1; height: 1px; background: #D0D9ED; }
 
         /* ── INFO GRID ── */
-        .pdf-page-wrapper .info-grid { display: flex; flex-direction: column; }
-        .pdf-page-wrapper .info-row {
+        .info-grid { display: flex; flex-direction: column; }
+        .info-row {
           display: flex;
-          border-bottom: 1px solid var(--border);
+          border-bottom: 1px solid #D0D9ED;
         }
-        .pdf-page-wrapper .info-row .info-cell { flex: 1; }
-        .pdf-page-wrapper .info-row:last-child { border-bottom: none; }
+        .info-row .info-cell { flex: 1; }
+        .info-row:last-child { border-bottom: none; }
 
-        .pdf-page-wrapper .info-cell {
+        .info-cell {
           padding: 9px 14px;
-          border-right: 1px solid var(--border);
+          border-right: 1px solid #D0D9ED;
           min-height: 46px;
         }
-        .pdf-page-wrapper .info-cell:last-child { border-right: none; }
-        .pdf-page-wrapper .info-cell .lbl {
+        .info-cell:last-child { border-right: none; }
+        .info-cell .lbl {
           font-size: 8.5px;
           font-weight: 700;
-          color: var(--muted);
+          color: #6B7A99;
           text-transform: uppercase;
           letter-spacing: 1px;
           margin-bottom: 3px;
         }
-        .pdf-page-wrapper .info-cell .val {
+        .info-cell .val {
           font-size: 13px;
           font-weight: 700;
-          color: var(--text);
+          color: #1C2640;
           line-height: 1.3;
         }
-        .pdf-page-wrapper .info-cell .val.gold { color: var(--gold); font-size: 15px; }
-        .pdf-page-wrapper .info-cell .val.blue { color: var(--blue); }
-        .pdf-page-wrapper .info-cell .val.big  { font-size: 16px; font-weight: 800; }
-        .pdf-page-wrapper .info-cell .val.empty {
-          color: #C0CAE0;
-          font-style: italic;
-          font-weight: 400;
-          font-size: 11px;
-          border-bottom: 1.5px solid var(--border);
-          padding-bottom: 2px;
-          min-width: 100px;
-          display: inline-block;
-        }
+        .info-cell .val.gold { color: #E6A817; font-size: 15px; }
+        .info-cell .val.blue { color: #1A4BD4; }
+        .info-cell .val.big  { font-size: 16px; font-weight: 800; }
 
-        .pdf-page-wrapper .info-grid-wrapper {
-          border: 1.5px solid var(--border);
+        .info-grid-wrapper {
+          border: 1.5px solid #D0D9ED;
           border-radius: 8px;
           overflow: hidden;
         }
 
         /* ── MEMBERSHIP PLAN BOX ── */
-        .pdf-page-wrapper .plan-box {
-          background: linear-gradient(135deg, var(--navy) 0%, #0F2860 100%);
+        .plan-box {
+          background: linear-gradient(135deg, #0B1F4B 0%, #0F2860 100%);
           border-radius: 8px;
           padding: 14px 20px;
           display: flex;
@@ -230,100 +251,99 @@ export default async function MemberContractPage({
           justify-content: space-between;
           margin-bottom: 4px;
         }
-        .pdf-page-wrapper .plan-box .plan-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: 1.5px; }
-        .pdf-page-wrapper .plan-box .plan-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; color: var(--gold); line-height: 1; }
-        .pdf-page-wrapper .plan-box .plan-sep  { width: 1px; height: 36px; background: rgba(255,255,255,.15); }
-        .pdf-page-wrapper .plan-box .plan-period { font-size: 11px; color: rgba(255,255,255,.5); text-align: center; }
-        .pdf-page-wrapper .plan-box .plan-period .pv { font-size: 14px; font-weight: 700; color: #fff; display: block; margin-top: 2px; }
+        .plan-box .plan-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: 1.5px; }
+        .plan-box .plan-val  { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; color: #E6A817; line-height: 1; }
+        .plan-box .plan-sep  { width: 1px; height: 36px; background: rgba(255,255,255,.15); }
+        .plan-box .plan-period { font-size: 11px; color: rgba(255,255,255,.5); text-align: center; }
+        .plan-box .plan-period .pv { font-size: 14px; font-weight: 700; color: #fff; display: block; margin-top: 2px; }
 
         /* ── TERMS ── */
-        .pdf-page-wrapper .terms-box {
-          background: var(--off);
-          border: 1px solid var(--border);
-          border-left: 4px solid var(--gold);
+        .terms-box {
+          background: #F4F6FB;
+          border: 1px solid #D0D9ED;
+          border-left: 4px solid #E6A817;
           border-radius: 6px;
           padding: 14px 18px;
           margin-bottom: 4px;
         }
-        .pdf-page-wrapper .terms-box .t-head {
+        .terms-box .t-head {
           font-size: 9px;
           font-weight: 800;
-          color: var(--navy);
+          color: #0B1F4B;
           text-transform: uppercase;
           letter-spacing: 1.5px;
           margin-bottom: 8px;
         }
-        .pdf-page-wrapper .terms-box ol { padding-left: 16px; margin: 0; }
-        .pdf-page-wrapper .terms-box li {
+        .terms-box ol { padding-left: 16px; margin: 0; }
+        .terms-box li {
           font-size: 10px;
           color: #4A5568;
           line-height: 1.6;
           margin-bottom: 4px;
         }
-        .pdf-page-wrapper .terms-box li strong { color: var(--text); }
+        .terms-box li strong { color: #1C2640; }
 
         /* ── DECLARATION ── */
-        .pdf-page-wrapper .declaration {
-          border: 1px solid var(--border);
+        .declaration {
+          border: 1px solid #E6A817;
           border-radius: 6px;
           padding: 12px 16px;
           font-size: 10.5px;
-          color: var(--navy);
+          color: #0B1F4B;
           font-style: italic;
           font-weight: 600;
           line-height: 1.6;
           text-align: center;
           background: #FFFBF0;
-          border-color: var(--gold);
           margin-bottom: 14px;
         }
 
         /* ── SIGNATURE AREA ── */
-        .pdf-page-wrapper .sig-area {
+        .sig-area {
           display: flex;
           gap: 32px;
           margin-top: 10px;
         }
-        .pdf-page-wrapper .sig-block { flex: 1; }
-        .pdf-page-wrapper .sig-block .sig-lbl {
+        .sig-block { flex: 1; }
+        .sig-block .sig-lbl {
           font-size: 8.5px;
           font-weight: 700;
-          color: var(--muted);
+          color: #6B7A99;
           text-transform: uppercase;
           letter-spacing: 1px;
           margin-bottom: 8px;
         }
-        .pdf-page-wrapper .sig-block .sig-box {
+        .sig-block .sig-box {
           height: 60px;
-          border: 1.5px dashed var(--border);
+          border: 1.5px dashed #D0D9ED;
           border-radius: 6px;
-          background: var(--off);
+          background: #F4F6FB;
           display: flex;
           align-items: center;
           justify-content: center;
         }
-        .pdf-page-wrapper .sig-block .sig-box .sig-script {
+        .sig-block .sig-box .sig-script {
           font-size: 26px;
           font-weight: 800;
           font-style: italic;
-          color: var(--navy);
+          color: #0B1F4B;
           font-family: 'Barlow Condensed', sans-serif;
           letter-spacing: -1px;
           opacity: .75;
         }
-        .pdf-page-wrapper .sig-block .sig-name-line {
-          border-top: 1.5px solid var(--border);
+        .sig-block .sig-name-line {
+          border-top: 1.5px solid #D0D9ED;
           margin-top: 8px;
           padding-top: 5px;
           font-size: 10px;
-          color: var(--muted);
+          color: #6B7A99;
           text-transform: uppercase;
           letter-spacing: .8px;
         }
-        .pdf-page-wrapper .sig-block .sig-name-line .name-val {
+        .sig-block .sig-name-line .name-val {
           font-size: 12px;
           font-weight: 700;
-          color: var(--text);
+          color: #1C2640;
           text-transform: none;
           letter-spacing: 0;
           display: block;
@@ -331,43 +351,35 @@ export default async function MemberContractPage({
         }
 
         /* ── FOOTER ── */
-        .pdf-page-wrapper .footer {
-          background: var(--navy);
+        .footer {
+          background: #0B1F4B;
           padding: 12px 40px;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
-        .pdf-page-wrapper .footer p { font-size: 9.5px; color: rgba(255,255,255,.4); margin: 0; }
-        .pdf-page-wrapper .footer .contact { font-size: 9.5px; color: var(--gold); font-weight: 600; }
+        .footer p { font-size: 9.5px; color: rgba(255,255,255,.4); margin: 0; }
+        .footer .contact { font-size: 9.5px; color: #E6A817; font-weight: 600; }
 
+        /* ── PRINT STYLES ── */
         @media print {
-          body {
-            background: #fff !important;
-            padding: 0 !important;
-          }
-          .pdf-page-wrapper {
-            background: #fff !important;
-            padding: 0 !important;
-          }
-          .pdf-page-wrapper .print-bar { display: none !important; }
-          .pdf-page-wrapper .a4-page {
-            width: 100%;
-            min-height: 100vh;
-            box-shadow: none;
-            border-radius: 0;
+          body { background: #fff !important; }
+          .page-wrap { padding: 0 !important; background: #fff !important; }
+          .print-bar { display: none !important; }
+          .a4-page {
+            width: 100% !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
           }
         }
       `}} />
-      <div className="pdf-page-wrapper">
+
+      <div className="page-wrap">
         {/* PRINT BAR */}
         <div className="print-bar">
-          <DownloadPdfButton 
-            memberName={member.name || 'Member'} 
-            sequentialId={sequentialId} 
-            autoDownload={resolvedSearchParams?.download === 'true'}
-            autoPrint={resolvedSearchParams?.print === 'true'}
-          />
+          <button className="btn-print" onClick={() => window.print()}>🖨 Print</button>
+          <button className="btn-download" id="download-btn">⬇ Download PDF</button>
         </div>
 
         {/* A4 PAGE */}
@@ -429,13 +441,13 @@ export default async function MemberContractPage({
                     <div className="val">{profile.gender || 'N/A'}</div>
                   </div>
                 </div>
-                <div className="info-row full">
+                <div className="info-row">
                   <div className="info-cell">
                     <div className="lbl">Address</div>
                     <div className="val">{profile.address || 'N/A'}</div>
                   </div>
                 </div>
-                <div className="info-row three">
+                <div className="info-row">
                   <div className="info-cell">
                     <div className="lbl">Emergency Contact Name</div>
                     <div className="val">{profile.emergencyContact || 'N/A'}</div>
@@ -501,13 +513,13 @@ export default async function MemberContractPage({
 
             {/* DECLARATION */}
             <div className="declaration">
-              "I have read, understood, and agreed to abide by all the terms and conditions outlined above and displayed at the gym premises."
+              &quot;I have read, understood, and agreed to abide by all the terms and conditions outlined above and displayed at the gym premises.&quot;
             </div>
 
             {/* SIGNATURE */}
             <div className="sig-area">
               <div className="sig-block">
-                <div className="sig-lbl">Member's Signature</div>
+                <div className="sig-lbl">Member&apos;s Signature</div>
                 <div className="sig-box">
                   <span style={{color: '#C0CAE0', fontSize: '10px', fontStyle: 'italic'}}>Sign here</span>
                 </div>
