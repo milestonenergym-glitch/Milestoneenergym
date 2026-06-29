@@ -93,7 +93,8 @@ export default async function MemberContractPage({
         ═══════════════════════════════════════════ */
         .a4-page {
           width: 794px;
-          min-height: 1123px;
+          height: 1123px; /* strict A4 height */
+          max-height: 1123px;
           margin: 0 auto;
           background: #fff;
           box-shadow: 0 8px 40px rgba(0,0,0,.18);
