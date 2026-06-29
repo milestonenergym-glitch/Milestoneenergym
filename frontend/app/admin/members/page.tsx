@@ -36,6 +36,7 @@ export default function MembersPage() {
   const [assignActualAmount, setAssignActualAmount] = useState('')
   const [assignPdfAmount, setAssignPdfAmount] = useState('')
   const [assignPaymentMode, setAssignPaymentMode] = useState('CASH')
+  const [assignLogPayment, setAssignLogPayment] = useState(true)
 
   // Auto-calculate end date when duration or start date changes
   useEffect(() => {
@@ -151,6 +152,7 @@ export default function MembersPage() {
       setAssignActualAmount(String(existing.amountPaid ?? ''))
       setAssignPdfAmount(String(existing.pdfAmount ?? ''))
       setAssignPaymentMode(existing.paymentMode || 'CASH')
+      setAssignLogPayment(false)
     } else {
       setAssignDurationMonths('')
       setAssignStartDate(new Date().toISOString().split('T')[0])
@@ -158,6 +160,7 @@ export default function MembersPage() {
       setAssignActualAmount('')
       setAssignPdfAmount('')
       setAssignPaymentMode('CASH')
+      setAssignLogPayment(true)
     }
   }
 
@@ -197,6 +200,7 @@ export default function MembersPage() {
       amountPaid: assignActualAmount,
       pdfAmount: assignPdfAmount,
       paymentMode: assignPaymentMode,
+      logPayment: assignLogPayment,
     }
     const res = await assignMembershipToMember(editingMember.id, data)
     if (res.success) {
@@ -575,6 +579,23 @@ export default function MembersPage() {
                         <option value="UPI">UPI</option>
                         <option value="CARD">Card</option>
                       </select>
+                    </div>
+                    
+                    <div className="sm:col-span-2">
+                      <label className="flex items-start gap-3 p-3 bg-zinc-950 border border-white/10 rounded-lg cursor-pointer hover:bg-zinc-900 transition-colors">
+                        <div className="mt-0.5">
+                          <input 
+                            type="checkbox" 
+                            checked={assignLogPayment} 
+                            onChange={(e) => setAssignLogPayment(e.target.checked)} 
+                            className="w-4 h-4 rounded border-white/10 bg-black/50 text-brand-gold focus:ring-brand-gold focus:ring-offset-zinc-900" 
+                          />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-white mb-1">Log as new transaction in Payment Ledger</div>
+                          <div className="text-xs text-zinc-500">Check this if this is a renewal or a new payment. Uncheck if you are just fixing a typo in the plan details to avoid duplicate payments.</div>
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>

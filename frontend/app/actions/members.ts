@@ -305,7 +305,7 @@ export async function assignMembershipToMember(userId: string, data: any) {
       })
 
       // 3. Log the payment
-      if (Number(amountPaid) > 0) {
+      if (Number(amountPaid) > 0 && data.logPayment !== false) {
         await tx.payment.create({
           data: {
             userId,
