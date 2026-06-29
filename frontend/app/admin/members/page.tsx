@@ -20,6 +20,7 @@ export default function MembersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<any>(null)
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('')
   
   // Plan assignment state
   const [assignDurationMonths, setAssignDurationMonths] = useState('')
@@ -62,9 +63,7 @@ export default function MembersPage() {
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
     
-    // Calculate duration based on selected plan
-    const planId = formData.get('planId') as string
-    const selectedPlan = plans.find(p => p.id === planId)
+    const selectedPlan = plans.find(p => p.id === selectedPlanId)
     
     const data = {
       name: formData.get('name'),
@@ -75,7 +74,7 @@ export default function MembersPage() {
       bloodGroup: formData.get('bloodGroup'),
       emergencyContact: formData.get('emergencyContact'),
       address: formData.get('address'),
-      planId,
+      planId: selectedPlanId || undefined,
       durationInDays: selectedPlan?.durationInDays || 0,
       amountPaid: formData.get('amountPaid') || selectedPlan?.price || 0,
       pdfAmount: formData.get('pdfAmount') || null,
@@ -86,6 +85,7 @@ export default function MembersPage() {
     if (res.success) {
       toast.success('Member added successfully!')
       setIsModalOpen(false)
+      setSelectedPlanId('')
       fetchData()
     } else {
       toast.error(res.error || 'Failed to add member')
@@ -454,26 +454,35 @@ export default function MembersPage() {
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-zinc-400 mb-1">Select Package</label>
-                      <select 
-                        name="planId" 
-                        className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none mb-4"
-                        onChange={(e) => {
-                          const plan = plans.find(p => p.id === e.target.value);
-                          if (plan) {
-                            (document.getElementById('manualAmountPaid') as HTMLInputElement).value = plan.price.toString();
-                            (document.getElementById('manualPdfAmount') as HTMLInputElement).value = plan.price.toString();
-                          } else {
+                      <label className="block text-sm font-medium text-zinc-400 mb-3">Select Package</label>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div 
+                          onClick={() => {
+                            setSelectedPlanId('');
                             (document.getElementById('manualAmountPaid') as HTMLInputElement).value = '';
                             (document.getElementById('manualPdfAmount') as HTMLInputElement).value = '';
-                          }
-                        }}
-                      >
-                        <option value="">No Plan (Add Profile Only)</option>
-                        {plans.map(p => (
-                          <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
+                          }}
+                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${!selectedPlanId ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
+                        >
+                          <div className={`font-bold ${!selectedPlanId ? 'text-brand-gold' : 'text-white'}`}>No Plan</div>
+                          <div className="text-sm text-zinc-400 mt-1">Profile only</div>
+                        </div>
+                        {plans.filter(p => p.isActive !== false).map(p => (
+                          <div 
+                            key={p.id}
+                            onClick={() => {
+                              setSelectedPlanId(p.id);
+                              (document.getElementById('manualAmountPaid') as HTMLInputElement).value = p.price.toString();
+                              (document.getElementById('manualPdfAmount') as HTMLInputElement).value = p.price.toString();
+                            }}
+                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlanId === p.id ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
+                          >
+                            <div className={`font-bold ${selectedPlanId === p.id ? 'text-brand-gold' : 'text-white'}`}>{p.name}</div>
+                            <div className="text-sm text-zinc-400 mt-1">₹{p.price} / {p.durationInDays} days</div>
+                          </div>
                         ))}
-                      </select>
+                      </div>
+                      <input type="hidden" name="planId" value={selectedPlanId} />
                     </div>
                     
                     <div>
