@@ -755,70 +755,72 @@ export default function PremiumRegistrationForm({
               </div>
 
               {/* PAYMENT */}
-              <div className="section">
-                <div className="section-label"><div className="dot"></div><span>Payment Details</span></div>
-                <div className="grid-row grid-2" style={{marginBottom: '18px'}}>
-                  <div className="field">
-                    <label>Start Date <span className="req">*</span></label>
-                    <input type="date" name="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+              {isAdmin && (
+                <div className="section">
+                  <div className="section-label"><div className="dot"></div><span>Payment Details</span></div>
+                  <div className="grid-row grid-2" style={{marginBottom: '18px'}}>
+                    <div className="field">
+                      <label>Start Date <span className="req">*</span></label>
+                      <input type="date" name="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+                    </div>
+                    <div className="field">
+                      <label>End Date (Auto)</label>
+                      <input type="date" name="endDate" value={endDate} readOnly style={{background: '#F0F4FF', color: '#4566B0', cursor: 'not-allowed'}} />
+                    </div>
+                    <div className="field">
+                      <label>Actual Amount Paid (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(for admin records)</span></label>
+                      <input type="number" name="amountPaid" placeholder="e.g. 999" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
+                      {isAdmin && (
+                        <div style={{display:'flex', gap:'6px', marginTop:'8px', flexWrap:'wrap'}}>
+                          {[10, 20, 25, 30].map(pct => (
+                            <button 
+                              key={pct}
+                              type="button"
+                              onClick={() => {
+                                const basePrice = selectedDbPlan ? selectedDbPlan.price : 0
+                                if (basePrice > 0) {
+                                  const discounted = Math.round(basePrice - (basePrice * (pct / 100)))
+                                  setAmountPaid(String(discounted))
+                                } else if (amountPaid) {
+                                  const current = Number(amountPaid)
+                                  const discounted = Math.round(current - (current * (pct / 100)))
+                                  setAmountPaid(String(discounted))
+                                }
+                              }}
+                              style={{
+                                fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '6px',
+                                background: '#E0E7F5', color: '#1A4BD4', border: '1px solid #C2D1F0', cursor: 'pointer'
+                              }}
+                            >
+                              {pct}% OFF
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="field">
+                      <label>PDF / Contract Amount (₹) <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(shown on PDF)</span></label>
+                      <input type="number" name="pdfAmount" placeholder="Leave blank to use actual" value={pdfAmount} onChange={(e) => setPdfAmount(e.target.value)} />
+                    </div>
                   </div>
-                  <div className="field">
-                    <label>End Date (Auto)</label>
-                    <input type="date" name="endDate" value={endDate} readOnly style={{background: '#F0F4FF', color: '#4566B0', cursor: 'not-allowed'}} />
-                  </div>
-                  <div className="field">
-                    <label>Actual Amount Paid (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(for admin records)</span></label>
-                    <input type="number" name="amountPaid" placeholder="e.g. 999" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
-                    {isAdmin && (
-                      <div style={{display:'flex', gap:'6px', marginTop:'8px', flexWrap:'wrap'}}>
-                        {[10, 20, 25, 30].map(pct => (
-                          <button 
-                            key={pct}
-                            type="button"
-                            onClick={() => {
-                              const basePrice = selectedDbPlan ? selectedDbPlan.price : 0
-                              if (basePrice > 0) {
-                                const discounted = Math.round(basePrice - (basePrice * (pct / 100)))
-                                setAmountPaid(String(discounted))
-                              } else if (amountPaid) {
-                                const current = Number(amountPaid)
-                                const discounted = Math.round(current - (current * (pct / 100)))
-                                setAmountPaid(String(discounted))
-                              }
-                            }}
-                            style={{
-                              fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '6px',
-                              background: '#E0E7F5', color: '#1A4BD4', border: '1px solid #C2D1F0', cursor: 'pointer'
-                            }}
-                          >
-                            {pct}% OFF
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="field">
-                    <label>PDF / Contract Amount (₹) <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(shown on PDF)</span></label>
-                    <input type="number" name="pdfAmount" placeholder="Leave blank to use actual" value={pdfAmount} onChange={(e) => setPdfAmount(e.target.value)} />
+                  <div className="field" style={{marginBottom: 0}}>
+                    <label>Payment Mode <span className="req">*</span></label>
+                    <div className="payment-options" style={{marginTop: '4px'}}>
+                      {[
+                        { val: 'CASH', label: 'Cash', icon: '💵' },
+                        { val: 'UPI', label: 'UPI / PhonePe', icon: '📱' },
+                        { val: 'CARD', label: 'Card', icon: '💳' },
+                        { val: 'BANK', label: 'Bank Transfer', icon: '🏦' }
+                      ].map(mode => (
+                        <label key={mode.val} className={`pay-opt ${payMode === mode.val ? 'selected' : ''}`}>
+                          <input type="radio" name="payMode" value={mode.val} checked={payMode === mode.val} onChange={() => setPayMode(mode.val)} />
+                          <span className="icon">{mode.icon}</span> {mode.label}
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="field" style={{marginBottom: 0}}>
-                  <label>Payment Mode <span className="req">*</span></label>
-                  <div className="payment-options" style={{marginTop: '4px'}}>
-                    {[
-                      { val: 'CASH', label: 'Cash', icon: '💵' },
-                      { val: 'UPI', label: 'UPI / PhonePe', icon: '📱' },
-                      { val: 'CARD', label: 'Card', icon: '💳' },
-                      { val: 'BANK', label: 'Bank Transfer', icon: '🏦' }
-                    ].map(mode => (
-                      <label key={mode.val} className={`pay-opt ${payMode === mode.val ? 'selected' : ''}`}>
-                        <input type="radio" name="payMode" value={mode.val} checked={payMode === mode.val} onChange={() => setPayMode(mode.val)} />
-                        <span className="icon">{mode.icon}</span> {mode.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* HEALTH INFO */}
               <div className="section">
