@@ -354,16 +354,37 @@ export default async function MemberContractPage({
         .footer .contact { font-size: 9.5px; color: #E6A817; font-weight: 600; }
 
         /* ── PRINT STYLES ── */
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
         @media print {
-          body { background: #fff !important; }
-          .page-wrap { padding: 0 !important; background: #fff !important; }
+          html, body {
+            width: 210mm;
+            height: 297mm;
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          .page-wrap {
+            padding: 0 !important;
+            background: #fff !important;
+            margin: 0 !important;
+          }
           .print-bar { display: none !important; }
           .a4-page {
-            width: 100% !important;
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: unset !important;
+            max-height: 297mm !important;
             box-shadow: none !important;
             border-radius: 0 !important;
             margin: 0 !important;
+            overflow: hidden !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}} />
 
