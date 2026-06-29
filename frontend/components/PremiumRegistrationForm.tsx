@@ -65,12 +65,15 @@ export default function PremiumRegistrationForm({
     
     // Determine plan details
     let durationMonths = 1
+    let durationInDays = 30
     let planId: string | undefined = undefined
     if (selectedPlanType === 'db' && selectedDbPlan) {
       planId = selectedDbPlan.id
       durationMonths = selectedDbPlan.durationInDays ? Math.round(selectedDbPlan.durationInDays / 30) : 1
+      durationInDays = selectedDbPlan.durationInDays || 30
     } else if (selectedPlanType === 'custom') {
       durationMonths = parseInt(customMonths, 10)
+      durationInDays = durationMonths * 30
     }
 
     const data = {
@@ -86,6 +89,7 @@ export default function PremiumRegistrationForm({
       medicalConditions: formData.get('medical'),
       planId,
       durationMonths,
+      durationInDays,
       startDate: new Date(startDate),
       amountPaid: Number(amountPaid) || 0,
       pdfAmount: pdfAmount ? Number(pdfAmount) : null,
