@@ -45,180 +45,185 @@ export default function MarketingPopupAdmin() {
 
   const defaultHTML = `<style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&display=swap');
-  #occasion-popup-overlay *{box-sizing:border-box;margin:0;padding:0;}
-  .overlay{
-    min-height:600px;
-    background:rgba(0,0,0,0.82);
-    display:flex;align-items:center;justify-content:center;
-    padding:20px;
-    font-family:'Rajdhani',sans-serif;
+  #me-occasion-popup * { box-sizing: border-box; margin: 0; padding: 0; }
+  .me-overlay {
+    position: fixed; inset: 0;
+    min-height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    font-family: 'Rajdhani', sans-serif;
+    z-index: 999999;
   }
-  .popup{
-    background:#0d1117;
-    border:1.5px solid #1E3A5F;
-    border-radius:16px;
-    width:100%;max-width:560px;
-    overflow:hidden;
-    position:relative;
+  .me-popup {
+    background: #0d1117;
+    border: 1.5px solid #1E3A5F;
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
-  .top-bar{
-    background:linear-gradient(90deg,#0B2A6E 0%,#1a4fbd 50%,#B8860B 100%);
-    padding:10px 20px;
-    text-align:center;
-    font-size:13px;
-    font-weight:700;
-    color:#fff;
-    letter-spacing:2px;
-    text-transform:uppercase;
+  .me-top-bar {
+    background: linear-gradient(90deg,#0B2A6E 0%,#1a4fbd 50%,#B8860B 100%);
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
   }
-  .main-box{padding:28px 32px 24px;position:relative;}
-  .logo-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
-  .logo-img{width:64px;height:64px;border-radius:50%;border:2.5px solid #B8860B;object-fit:cover;}
-  .brand-name{display:flex;flex-direction:column;}
-  .brand-name span:first-child{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:28px;color:#1a6ed8;letter-spacing:2px;line-height:1;
+  .me-main-box { padding: 28px 32px 24px; position: relative; }
+  .me-logo-row { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .me-logo-img { width: 64px; height: 64px; border-radius: 50%; border: 2.5px solid #B8860B; object-fit: cover; }
+  .me-brand-name { display: flex; flex-direction: column; }
+  .me-brand-name span:first-child {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px; color: #1a6ed8; letter-spacing: 2px; line-height: 1;
   }
-  .brand-name span:last-child{
-    font-size:12px;color:#B8860B;letter-spacing:4px;text-transform:uppercase;font-weight:700;
+  .me-brand-name span:last-child {
+    font-size: 12px; color: #B8860B; letter-spacing: 4px; text-transform: uppercase; font-weight: 700;
   }
-  .badge{
-    background:#B8860B;color:#fff;
-    font-size:11px;font-weight:700;
-    padding:4px 12px;border-radius:20px;
-    text-transform:uppercase;letter-spacing:1px;
-    display:inline-block;margin-bottom:12px;
+  .me-badge {
+    background: #B8860B; color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 1px;
+    display: inline-block; margin-bottom: 12px;
   }
-  .headline{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:48px;color:#fff;
-    line-height:1;
-    margin-bottom:4px;
+  .me-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: #fff;
+    line-height: 1;
+    margin-bottom: 4px;
   }
-  .headline span{color:#B8860B;}
-  .sub-headline{
-    font-size:18px;color:#a0b4d0;font-weight:500;
-    margin-bottom:20px;letter-spacing:0.5px;
+  .me-headline span { color: #B8860B; }
+  .me-sub-headline {
+    font-size: 18px; color: #a0b4d0; font-weight: 500;
+    margin-bottom: 20px; letter-spacing: 0.5px;
   }
-  .divider{height:1px;background:linear-gradient(90deg,transparent,#1a4fbd,#B8860B,transparent);margin:16px 0;}
-  .offer-box{
-    background:#0a1628;border:1px solid #1E3A5F;
-    border-radius:10px;padding:16px 20px;margin-bottom:20px;
-    text-align:center;
+  .me-divider { height: 1px; background: linear-gradient(90deg,transparent,#1a4fbd,#B8860B,transparent); margin: 16px 0; }
+  .me-offer-box {
+    background: #0a1628; border: 1px solid #1E3A5F;
+    border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;
+    text-align: center;
   }
-  .offer-label{font-size:12px;color:#8aa6c4;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;}
-  .offer-value{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:64px;
-    background:linear-gradient(135deg,#1a6ed8,#B8860B);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    line-height:1;margin-bottom:4px;
+  .me-offer-label { font-size: 12px; color: #8aa6c4; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+  .me-offer-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    background: linear-gradient(135deg,#1a6ed8,#B8860B);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1; margin-bottom: 4px;
   }
-  .offer-sub{font-size:13px;color:#a0b4d0;font-weight:500;}
-  .details-row{display:flex;gap:12px;margin-bottom:20px;}
-  .detail-card{
-    flex:1;background:#0a1628;border:1px solid #1E3A5F;
-    border-radius:8px;padding:12px;text-align:center;
+  .me-offer-sub { font-size: 13px; color: #a0b4d0; font-weight: 500; }
+  .me-details-row { display: flex; gap: 12px; margin-bottom: 20px; }
+  .me-detail-card {
+    flex: 1; background: #0a1628; border: 1px solid #1E3A5F;
+    border-radius: 8px; padding: 12px; text-align: center;
   }
-  .detail-card .icon{font-size:20px;margin-bottom:4px;}
-  .detail-card .d-label{font-size:10px;color:#8aa6c4;text-transform:uppercase;letter-spacing:1px;}
-  .detail-card .d-val{font-size:15px;color:#fff;font-weight:700;}
-  .cta-btn{
-    display:block;width:100%;
-    background:linear-gradient(90deg,#0B2A6E,#1a4fbd);
-    color:#fff;border:none;
-    border-radius:10px;padding:16px;
-    font-family:'Bebas Neue',sans-serif;
-    font-size:22px;letter-spacing:3px;
-    cursor:pointer;text-align:center;
-    text-decoration:none;
-    transition:opacity 0.2s;
-    margin-bottom:10px;
+  .me-detail-card .me-icon { font-size: 20px; margin-bottom: 4px; }
+  .me-detail-card .me-d-label { font-size: 10px; color: #8aa6c4; text-transform: uppercase; letter-spacing: 1px; }
+  .me-detail-card .me-d-val { font-size: 15px; color: #fff; font-weight: 700; }
+  .me-cta-btn {
+    display: block; width: 100%;
+    background: linear-gradient(90deg,#0B2A6E,#1a4fbd);
+    color: #fff; border: none;
+    border-radius: 10px; padding: 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 3px;
+    cursor: pointer; text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s;
+    margin-bottom: 10px;
   }
-  .cta-btn:hover{opacity:0.88;}
-  .cta-btn2{
-    display:block;width:100%;
-    background:transparent;
-    color:#B8860B;border:1.5px solid #B8860B;
-    border-radius:10px;padding:12px;
-    font-family:'Bebas Neue',sans-serif;
-    font-size:18px;letter-spacing:2px;
-    cursor:pointer;text-align:center;
-    text-decoration:none;
-    transition:all 0.2s;
-    margin-bottom:14px;
+  .me-cta-btn:hover { opacity: 0.88; }
+  .me-cta-btn2 {
+    display: block; width: 100%;
+    background: transparent;
+    color: #B8860B; border: 1.5px solid #B8860B;
+    border-radius: 10px; padding: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px;
+    cursor: pointer; text-align: center;
+    text-decoration: none;
+    transition: all 0.2s;
+    margin-bottom: 14px;
   }
-  .cta-btn2:hover{background:#B8860B22;}
-  .footnote{text-align:center;font-size:11px;color:#4a6380;letter-spacing:0.5px;}
-  .close-btn{
-    position:absolute;top:14px;right:16px;
-    background:none;border:none;color:#4a6380;
-    font-size:22px;cursor:pointer;line-height:1;
+  .me-cta-btn2:hover { background: #B8860B22; }
+  .me-footnote { text-align: center; font-size: 11px; color: #4a6380; letter-spacing: 0.5px; }
+  .me-close-btn {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; color: #4a6380;
+    font-size: 22px; cursor: pointer; line-height: 1;
     z-index: 50;
   }
-  .close-btn:hover{color:#fff;}
-  .countdown-row{
-    display:flex;justify-content:center;gap:16px;margin-bottom:18px;
+  .me-close-btn:hover { color: #fff; }
+  .me-countdown-row {
+    display: flex; justify-content: center; gap: 16px; margin-bottom: 18px;
   }
-  .c-block{text-align:center;}
-  .c-num{
-    font-family:'Bebas Neue',sans-serif;
-    font-size:36px;color:#1a6ed8;
-    background:#0a1628;
-    border:1px solid #1E3A5F;
-    border-radius:6px;
-    padding:4px 12px;min-width:56px;
-    display:inline-block;line-height:1.1;
+  .me-c-block { text-align: center; }
+  .me-c-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; color: #1a6ed8;
+    background: #0a1628;
+    border: 1px solid #1E3A5F;
+    border-radius: 6px;
+    padding: 4px 12px; min-width: 56px;
+    display: inline-block; line-height: 1.1;
   }
-  .c-lab{font-size:10px;color:#8aa6c4;text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
-</style>
-<div class="overlay" id="occasion-popup-overlay">
-  <div class="popup">
-    <div class="top-bar">⚡ Grand Opening Special — Limited Offer ⚡</div>
-    <div class="main-box">
-      <button class="close-btn" onclick="document.getElementById('occasion-popup-overlay').style.display='none'">✕</button>
-      <div class="logo-row">
-        <img class="logo-img" src="/logo.jpg" alt="Milestone Energym Logo" onerror="this.style.display='none'"/>
-        <div class="brand-name">
+  .me-c-lab { font-size: 10px; color: #8aa6c4; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+<div class="me-overlay" id="occasion-popup-overlay">
+  <div class="me-popup">
+    <div class="me-top-bar">⚡ Grand Opening Special — Limited Offer ⚡</div>
+    <div class="me-main-box">
+      <button class="me-close-btn" onclick="document.getElementById('occasion-popup-overlay').style.display='none'">✕</button>
+      <div class="me-logo-row">
+        <img class="me-logo-img" src="/logo.jpg" alt="Milestone Energym Logo" onerror="this.style.display='none'"/>
+        <div class="me-brand-name">
           <span>MILESTONE</span>
           <span>—ENERGYM—</span>
         </div>
       </div>
-      <span class="badge">🎉 Grand Opening — 9th July 2025</span>
-      <div class="headline">WE ARE<span> OPEN!</span></div>
-      <div class="sub-headline">Train Hard. Stay Strong. Transform Now.</div>
-      <div class="divider"></div>
-      <div class="offer-box">
-        <div class="offer-label">Opening Day Exclusive</div>
-        <div class="offer-value">20% OFF</div>
-        <div class="offer-sub">On All Membership Joining — 9th July Only</div>
+      <span class="me-badge">🎉 Grand Opening — 9th July 2025</span>
+      <div class="me-headline">WE ARE<span> OPEN!</span></div>
+      <div class="me-sub-headline">Train Hard. Stay Strong. Transform Now.</div>
+      <div class="me-divider"></div>
+      <div class="me-offer-box">
+        <div class="me-offer-label">Opening Day Exclusive</div>
+        <div class="me-offer-value">20% OFF</div>
+        <div class="me-offer-sub">On All Membership Joining — 9th July Only</div>
       </div>
-      <div class="details-row">
-        <div class="detail-card">
-          <div class="icon">📅</div>
-          <div class="d-label">Date</div>
-          <div class="d-val">9th July 2025</div>
+      <div class="me-details-row">
+        <div class="me-detail-card">
+          <div class="me-icon">📅</div>
+          <div class="me-d-label">Date</div>
+          <div class="me-d-val">9th July 2025</div>
         </div>
-        <div class="detail-card">
-          <div class="icon">🕙</div>
-          <div class="d-label">Opens At</div>
-          <div class="d-val">10:00 AM</div>
+        <div class="me-detail-card">
+          <div class="me-icon">🕙</div>
+          <div class="me-d-label">Opens At</div>
+          <div class="me-d-val">10:00 AM</div>
         </div>
-        <div class="detail-card">
-          <div class="icon">📍</div>
-          <div class="d-label">Location</div>
-          <div class="d-val">Barmer, Raj.</div>
+        <div class="me-detail-card">
+          <div class="me-icon">📍</div>
+          <div class="me-d-label">Location</div>
+          <div class="me-d-val">Barmer, Raj.</div>
         </div>
       </div>
-      <div class="countdown-row">
-        <div class="c-block"><div class="c-num" id="cd-d">--</div><div class="c-lab">Days</div></div>
-        <div class="c-block"><div class="c-num" id="cd-h">--</div><div class="c-lab">Hours</div></div>
-        <div class="c-block"><div class="c-num" id="cd-m">--</div><div class="c-lab">Mins</div></div>
-        <div class="c-block"><div class="c-num" id="cd-s">--</div><div class="c-lab">Secs</div></div>
+      <div class="me-countdown-row">
+        <div class="me-c-block"><div class="me-c-num" id="cd-d">--</div><div class="me-c-lab">Days</div></div>
+        <div class="me-c-block"><div class="me-c-num" id="cd-h">--</div><div class="me-c-lab">Hours</div></div>
+        <div class="me-c-block"><div class="me-c-num" id="cd-m">--</div><div class="me-c-lab">Mins</div></div>
+        <div class="me-c-block"><div class="me-c-num" id="cd-s">--</div><div class="me-c-lab">Secs</div></div>
       </div>
-      <a class="cta-btn" href="/membership" target="_blank">⚡ CLAIM 20% OFF — JOIN NOW</a>
-      <a class="cta-btn2" href="https://wa.me/918875305442?text=Hi!%20I%20want%20to%20claim%20the%20Grand%20Opening%2020%25%20Off%20offer!" target="_blank">💬 WhatsApp Us to Book</a>
-      <div class="footnote">नवलाराम की चक्की, Near Crown Plaza NH68, Barmer, Rajasthan — 344001<br>Offer valid on 9th July 2025 only. Limited memberships at this price.</div>
+      <a class="me-cta-btn" href="/membership" target="_blank">⚡ CLAIM 20% OFF — JOIN NOW</a>
+      <a class="me-cta-btn2" href="https://wa.me/918875305442?text=Hi!%20I%20want%20to%20claim%20the%20Grand%20Opening%2020%25%20Off%20offer!" target="_blank">💬 WhatsApp Us to Book</a>
+      <div class="me-footnote">नवलाराम की चक्की, Near Crown Plaza NH68, Barmer, Rajasthan — 344001<br>Offer valid on 9th July 2025 only. Limited memberships at this price.</div>
     </div>
   </div>
 </div>
