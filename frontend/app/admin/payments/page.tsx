@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getPayments } from '@/app/actions/payments'
-import { CreditCard, IndianRupee, Clock, CheckCircle2, XCircle, Search } from 'lucide-react'
+import { getPayments, deletePayment } from '@/app/actions/payments'
+import { CreditCard, IndianRupee, Clock, CheckCircle2, XCircle, Search, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<any[]>([])
@@ -19,6 +20,19 @@ export default function PaymentsPage() {
     const data = await getPayments()
     setPayments(data)
     setLoading(false)
+  }
+
+  const handleDeletePayment = async (paymentId: string) => {
+    if (!window.confirm("Are you sure you want to delete this payment? This action cannot be undone.")) {
+      return
+    }
+    const res = await deletePayment(paymentId)
+    if (res.success) {
+      toast.success("Payment deleted successfully")
+      fetchPayments()
+    } else {
+      toast.error(res.error || "Failed to delete payment")
+    }
   }
 
   const filteredPayments = payments.filter(p => 
@@ -83,19 +97,20 @@ export default function PaymentsPage() {
                 <th className="px-6 py-4">Mode</th>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
                     <div className="animate-spin w-6 h-6 border-2 border-brand-gold border-t-transparent rounded-full mx-auto mb-2"></div>
                     Loading payments...
                   </td>
                 </tr>
               ) : filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-zinc-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-zinc-500">
                     No transactions found.
                   </td>
                 </tr>
@@ -130,6 +145,15 @@ export default function PaymentsPage() {
                         {getStatusIcon(payment.status)}
                         {payment.status}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => handleDeletePayment(payment.id)}
+                        className="text-zinc-500 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-white/5"
+                        title="Delete Payment"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))

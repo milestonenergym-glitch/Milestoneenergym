@@ -20,3 +20,18 @@ export async function getPayments() {
     return []
   }
 }
+
+import { revalidatePath } from 'next/cache'
+
+export async function deletePayment(paymentId: string) {
+  try {
+    await prisma.payment.delete({
+      where: { id: paymentId }
+    })
+    revalidatePath('/admin/payments')
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to delete payment:', error)
+    return { success: false, error: 'Failed to delete payment' }
+  }
+}
