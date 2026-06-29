@@ -70,7 +70,7 @@ export default async function MemberContractPage({
         ═══════════════════════════════════════════ */
         .pdf-page-wrapper .a4-page {
           width: 794px;
-          height: 1123px;
+          min-height: 1123px;
           margin: 0 auto;
           background: #fff;
           box-shadow: 0 8px 40px rgba(0,0,0,.18);
@@ -377,17 +377,9 @@ export default async function MemberContractPage({
 
           {/* HEADER */}
           <div className="header">
-            <div className="logo-box">
+            <div className="logo-box" style={{ width: '64px', height: '64px', overflow: 'hidden' }}>
               {settings?.logoUrl ? (
-                <div style={{ 
-                  backgroundImage: `url(${settings.logoUrl})`, 
-                  backgroundSize: 'contain', 
-                  backgroundPosition: 'center', 
-                  backgroundRepeat: 'no-repeat', 
-                  width: '100%', 
-                  height: '100%', 
-                  borderRadius: '10px' 
-                }} />
+                <img src={settings.logoUrl} alt="Logo" width={64} height={64} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '10px' }} />
               ) : 'ME'}
             </div>
             <div className="brand">

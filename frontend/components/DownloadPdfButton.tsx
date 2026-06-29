@@ -35,6 +35,10 @@ export default function DownloadPdfButton({
 
     try {
       setIsDownloading(true)
+      
+      // Scroll to top before capturing to prevent blank canvas bug in html2canvas
+      window.scrollTo(0, 0);
+
       // Safely import html2pdf for both ESM and CJS
       const html2pdfModule = await import('html2pdf.js')
       const html2pdf = html2pdfModule.default || (html2pdfModule as any)
