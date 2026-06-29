@@ -16,35 +16,31 @@ export default function PrintTrigger({
   memberName: string
 }) {
   useEffect(() => {
-    // Wire the Download PDF button
-    const btn = document.getElementById('download-btn')
-    if (btn) {
-      btn.addEventListener('click', handleDownload)
-    }
-
-    // Auto-trigger print or download after fonts/images load
+    // Auto-trigger after page fully renders (fonts, images etc.)
     const timer = setTimeout(() => {
       if (autoPrint) {
-        document.title = filename
-        window.print()
+        handlePrint()
       } else if (autoDownload) {
         handleDownload()
       }
-    }, 1000)
-
-    return () => {
-      clearTimeout(timer)
-      if (btn) btn.removeEventListener('click', handleDownload)
-    }
+    }, 1200)
+    return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handlePrint = () => {
+    const prev = document.title
+    document.title = filename
+    window.print()
+    document.title = prev
+  }
 
   const handleDownload = async () => {
     try {
       const html2pdfModule = await import('html2pdf.js')
       const html2pdf = html2pdfModule.default || (html2pdfModule as any)
       const element = document.getElementById('contract-content')
-      if (!element) return
+      if (!element) { handlePrint(); return }
       const opt = {
         margin: 0,
         filename: `${filename}.pdf`,
@@ -55,10 +51,14 @@ export default function PrintTrigger({
       await html2pdf().set(opt).from(element).save()
     } catch (err) {
       console.error('PDF generation failed', err)
-      // Fallback to print if download fails
-      window.print()
+      handlePrint() // fallback
     }
   }
 
-  return null
+  return (
+    <div className="print-bar">
+      <button className="btn-print" onClick={handlePrint}>🖨 Print / Save PDF</button>
+      <button className="btn-download" onClick={handleDownload}>⬇ Download PDF</button>
+    </div>
+  )
 }

@@ -42,14 +42,6 @@ export default async function MemberContractPage({
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
 
-      {/* Auto-trigger: print or download on load */}
-      <PrintTrigger 
-        autoPrint={autoPrint} 
-        autoDownload={autoDownload}
-        filename={filename}
-        sequentialId={sequentialId}
-        memberName={member.name || 'Member'}
-      />
 
       <style dangerouslySetInnerHTML={{ __html: `
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -376,11 +368,14 @@ export default async function MemberContractPage({
       `}} />
 
       <div className="page-wrap">
-        {/* PRINT BAR */}
-        <div className="print-bar">
-          <button className="btn-print" onClick={() => window.print()}>🖨 Print</button>
-          <button className="btn-download" id="download-btn">⬇ Download PDF</button>
-        </div>
+        {/* PRINT BAR — rendered by PrintTrigger (client component) */}
+        <PrintTrigger 
+          autoPrint={autoPrint} 
+          autoDownload={autoDownload}
+          filename={filename}
+          sequentialId={sequentialId}
+          memberName={member.name || 'Member'}
+        />
 
         {/* A4 PAGE */}
         <div className="a4-page" id="contract-content">
