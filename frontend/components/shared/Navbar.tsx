@@ -211,14 +211,14 @@ export default function Navbar() {
             </a>
 
             {/* Free Trial CTA */}
-            <Link
+            <a
               href="/#free-trial"
               className="hidden md:inline-flex btn-primary text-sm py-2.5 px-4"
               id="nav-free-trial-cta"
             >
               <Dumbbell className="w-4 h-4" />
               Free Trial
-            </Link>
+            </a>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -328,13 +328,14 @@ export default function Navbar() {
 
               {/* Mobile CTAs */}
               <div className="p-5 border-t border-white/10 space-y-3">
-                <Link
+                <a
                   href="/#free-trial"
-                  className="btn-primary w-full justify-center py-3"
-                  id="mobile-free-trial"
+                  className="btn-primary w-full py-4 text-sm mt-4 flex justify-center"
+                  onClick={() => setMobileOpen(false)}
                 >
+                  <Calendar className="w-4 h-4 mr-2" />
                   Book Free Trial
-                </Link>
+                </a>
 
                 <a
                   href="tel:+918875305442"

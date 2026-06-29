@@ -60,14 +60,14 @@ export default function CTABanner({ settings }: { settings?: any }) {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
 
-            <Link
+            <a
               href="/#free-trial"
               className="flex items-center gap-3 border-2 border-white/30 text-white font-bold text-lg px-10 py-4 rounded-2xl hover:bg-white/10 transition-all hover:-translate-y-1"
               id="cta-free-trial"
             >
               <Calendar className="w-5 h-5" />
               Book Free Trial
-            </Link>
+            </a>
 
             <a
               href="tel:+918875305442"

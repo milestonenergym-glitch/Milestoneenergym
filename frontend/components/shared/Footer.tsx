@@ -93,14 +93,14 @@ export default async function Footer() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0">
-              <Link
+              <a
                 href="/#free-trial"
                 className="btn-primary py-3 px-6"
                 id="footer-free-trial-cta"
               >
                 Book Free Trial
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </a>
               <a
                 href={`https://wa.me/${settings?.contactPhone?.replace(/[^0-9]/g, '') || '918875305442'}?text=Hi%20Milestone%20Energym!%20I%27m%20interested%20in%20joining%20the%20gym.`}
                 target="_blank"

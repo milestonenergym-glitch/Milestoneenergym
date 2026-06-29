@@ -234,7 +234,7 @@ export default function HeroSection() {
           </Link>
 
           {/* Secondary: Free Trial */}
-          <Link
+          <a
             href="/#free-trial"
             className="gradient-border w-full sm:w-auto"
             id="hero-free-trial"
@@ -243,7 +243,7 @@ export default function HeroSection() {
               <Calendar className="w-5 h-5 text-brand-gold" />
               Book Free Trial
             </button>
-          </Link>
+          </a>
 
           {/* Call */}
           <a
