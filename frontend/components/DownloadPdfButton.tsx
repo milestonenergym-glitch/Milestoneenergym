@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 
 export default function DownloadPdfButton({ 
   memberName, 
@@ -11,15 +11,16 @@ export default function DownloadPdfButton({
   sequentialId: string,
   autoDownload?: boolean
 }) {
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     let mounted = true;
     let timeoutId: NodeJS.Timeout;
 
     if (autoDownload && mounted) {
-      // Small delay to ensure images/fonts are loaded before auto-print
+      // Small delay to ensure images/fonts are loaded before auto-download
       timeoutId = setTimeout(() => {
-        handlePrint()
+        handleDownload()
       }, 800)
     }
 
@@ -29,24 +30,50 @@ export default function DownloadPdfButton({
     }
   }, [autoDownload])
 
-  const handlePrint = () => {
-    // We dynamically set document title so that the default save name in Chrome's "Save as PDF" is nice
-    const originalTitle = document.title;
-    document.title = `Milestone_Contract_${sequentialId}_${memberName.replace(/\s+/g, '_')}`;
-    
-    window.print();
-    
-    // Restore original title after print dialog closes
-    document.title = originalTitle;
+  const handleDownload = async () => {
+    if (isDownloading) return;
+
+    try {
+      setIsDownloading(true)
+      
+      // Scroll to top before capturing to prevent blank canvas bug in html2canvas
+      window.scrollTo(0, 0);
+
+      // Safely import html2pdf for both ESM and CJS
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default || (html2pdfModule as any)
+      
+      const element = document.getElementById('contract-content')
+      if (!element) {
+        setIsDownloading(false)
+        return
+      }
+
+      const opt = {
+        margin:       0,
+        filename:     `Milestone_Contract_${sequentialId}_${memberName.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 1 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      } as any
+      
+      await html2pdf().set(opt).from(element).save()
+    } catch (error) {
+      console.error("Failed to generate PDF", error)
+      alert("Failed to download PDF: " + (error instanceof Error ? error.message : String(error)))
+    } finally {
+      setIsDownloading(false)
+    }
   }
 
   return (
-    <div className="mt-12 text-center print:hidden">
+    <div className="mt-12 text-center print:hidden" data-html2canvas-ignore="true">
       <button 
-        onClick={handlePrint}
-        className="bg-black text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer"
+        onClick={handleDownload}
+        disabled={isDownloading}
+        className="bg-black text-white px-8 py-3 rounded font-bold uppercase tracking-wider hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
       >
-        Print / Save PDF
+        {isDownloading ? 'Generating PDF...' : 'Download PDF'}
       </button>
     </div>
   )
