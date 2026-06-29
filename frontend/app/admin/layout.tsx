@@ -114,7 +114,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             {(isSidebarOpen || isMobileMenuOpen) && (
               <span className="font-bold text-sm tracking-widest text-brand-gold truncate">
-                ENERGYM
+                MILESTONE ENERGYM
               </span>
             )}
           </Link>
@@ -210,10 +210,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-3 cursor-pointer group">
               <div className="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold text-sm shrink-0 border border-brand-gold/30">
                 {session?.user?.name?.charAt(0) || 'A'}
-              </div>
-              <div className="hidden sm:block text-sm">
-                <span className="font-semibold text-sm truncate">{session?.user?.name || 'Admin User'}</span>
-                <span className="text-xs text-zinc-500 truncate capitalize">{session?.user?.role?.toLowerCase().replace('_', ' ') || 'Admin'}</span>
               </div>
               <ChevronDown className="w-4 h-4 text-zinc-500 hidden sm:block" />
             </div>

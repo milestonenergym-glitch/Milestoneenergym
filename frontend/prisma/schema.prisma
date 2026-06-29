@@ -251,6 +251,8 @@ model Membership {
   status      String   @default("ACTIVE") // ACTIVE, EXPIRING, EXPIRED, CANCELLED
   
   amountPaid  Float
+  totalAmount Float?   // Total agreed amount
+  pendingDues Float    @default(0)
   pdfAmount   Float?   // Custom amount to show on PDF contract
   paymentMode String   @default("CASH") // CASH, UPI, CARD
   

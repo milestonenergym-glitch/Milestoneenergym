@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { getMembers, createMember, updateMemberProfile, assignMembershipToMember } from '@/app/actions/members'
+import { getMembers, createMember, updateMemberProfile, assignMembershipToMember, settleDues } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
 import { generateRegistrationLink } from '@/app/actions/registration-links'
 import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2, Download } from 'lucide-react'
@@ -22,6 +22,12 @@ export default function MembersPage() {
   const [editingMember, setEditingMember] = useState<any>(null)
   const [isRenewing, setIsRenewing] = useState(false)
   const [selectedPackage, setSelectedPackage] = useState<string>('')
+  
+  // Settle Dues State
+  const [isSettleDuesModalOpen, setIsSettleDuesModalOpen] = useState(false)
+  const [settleMembership, setSettleMembership] = useState<any>(null)
+  const [settleAmount, setSettleAmount] = useState('')
+  const [settlePaymentMode, setSettlePaymentMode] = useState('CASH')
   
   // Plan assignment state
   const [assignDurationMonths, setAssignDurationMonths] = useState('')
@@ -203,6 +209,21 @@ export default function MembersPage() {
     setIsSubmitting(false)
   }
 
+  const handleSettleDues = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!settleMembership || !settleAmount) return
+    setIsSubmitting(true)
+    const res = await settleDues(settleMembership.id, Number(settleAmount), settlePaymentMode)
+    if (res.success) {
+      toast.success('Dues settled successfully!')
+      setIsSettleDuesModalOpen(false)
+      fetchData()
+    } else {
+      toast.error(res.error || 'Failed to settle dues')
+    }
+    setIsSubmitting(false)
+  }
+
   const getMembershipStatus = (member: any) => {
     if (!member.memberships || member.memberships.length === 0) {
       if (member.profile?.requestedDuration) {
@@ -318,6 +339,22 @@ export default function MembersPage() {
                     </td>
                     <td className="px-6 py-4">
                       {getMembershipStatus(member)}
+                      {member.memberships && member.memberships.length > 0 && member.memberships[0].pendingDues > 0 && (
+                        <div className="mt-2 flex items-center gap-2">
+                           <span className="text-red-500 font-bold text-xs bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">₹{member.memberships[0].pendingDues.toLocaleString('en-IN')} Due</span>
+                           <button 
+                             onClick={() => {
+                               setSettleMembership(member.memberships[0])
+                               setSettleAmount(String(member.memberships[0].pendingDues))
+                               setSettlePaymentMode('CASH')
+                               setIsSettleDuesModalOpen(true)
+                             }}
+                             className="text-[10px] font-semibold text-white bg-red-500/80 px-2 py-0.5 rounded hover:bg-red-500 transition-colors"
+                           >
+                             Settle
+                           </button>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-right flex justify-end gap-2">
                       <Link 
@@ -723,6 +760,60 @@ export default function MembersPage() {
                 </div>
                 <button type="submit" disabled={isSubmitting || !assignDurationMonths} className="w-full bg-brand-gold text-black font-bold py-3 rounded-xl hover:bg-brand-gold/90 transition-colors disabled:opacity-50 mt-4">
                   {isSubmitting ? 'Saving...' : editingMember?.memberships?.length > 0 ? '💾 Update Plan & Payment' : '✅ Assign Plan & Mark Paid'}
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Settle Dues Modal */}
+      {isSettleDuesModalOpen && settleMembership && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md my-8 relative"
+          >
+            <div className="p-6 border-b border-white/10 flex justify-between items-center sticky top-0 bg-zinc-900 z-10 rounded-t-2xl">
+              <h2 className="text-xl font-bold text-white">Settle Pending Dues</h2>
+              <button onClick={() => setIsSettleDuesModalOpen(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <form onSubmit={handleSettleDues} className="space-y-4">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl mb-4">
+                  <div className="text-sm text-red-500 mb-1">Total Pending Amount</div>
+                  <div className="text-2xl font-bold text-red-500">₹{settleMembership.pendingDues.toLocaleString('en-IN')}</div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Amount Being Paid (₹)</label>
+                  <input 
+                    type="number" 
+                    value={settleAmount}
+                    onChange={(e) => setSettleAmount(e.target.value)}
+                    max={settleMembership.pendingDues}
+                    placeholder="e.g. 1000"
+                    required 
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-400">Mode of Payment</label>
+                  <select 
+                    value={settlePaymentMode} 
+                    onChange={(e) => setSettlePaymentMode(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
+                  >
+                    <option value="CASH">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="CARD">Card</option>
+                    <option value="BANK">Bank Transfer</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isSubmitting} className="w-full bg-red-500 text-white font-bold py-3 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 mt-4">
+                  {isSubmitting ? 'Processing...' : 'Settle Dues Now'}
                 </button>
               </form>
             </div>

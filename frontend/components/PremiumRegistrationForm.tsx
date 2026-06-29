@@ -24,7 +24,9 @@ export default function PremiumRegistrationForm({
   const [selectedPlanType, setSelectedPlanType] = useState<'db' | 'custom' | ''>('')
   const [selectedDbPlan, setSelectedDbPlan] = useState<any>(null) // full plan object from DB
   const [customMonths, setCustomMonths] = useState('')
+  const [totalAmount, setTotalAmount] = useState('') // Total agreed amount
   const [amountPaid, setAmountPaid] = useState('')   // actual amount (for admin dashboard)
+  const [pendingDues, setPendingDues] = useState('') // Pending dues
   const [pdfAmount, setPdfAmount] = useState('')     // PDF/contract display amount
   const [payMode, setPayMode] = useState('CASH')
   const [endDate, setEndDate] = useState('')
@@ -47,6 +49,17 @@ export default function PremiumRegistrationForm({
       setEndDate('')
     }
   }, [startDate, selectedPlanType, selectedDbPlan, customMonths])
+
+  // Recalculate pending dues
+  useEffect(() => {
+    const total = Number(totalAmount) || 0
+    const paid = Number(amountPaid) || 0
+    if (total > 0 && paid >= 0 && total >= paid) {
+      setPendingDues(String(total - paid))
+    } else {
+      setPendingDues('0')
+    }
+  }, [totalAmount, amountPaid])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -705,9 +718,10 @@ export default function PremiumRegistrationForm({
                             onChange={() => {
                               setSelectedPlanType('db')
                               setSelectedDbPlan(plan)
+                              setCustomMonths('')
+                              setTotalAmount(String(plan.price))
                               setAmountPaid(String(plan.price))
                               setPdfAmount(String(plan.price))
-                              setCustomMonths('')
                             }}
                           />
                           <div className="plan-name">{plan.name}</div>
@@ -731,6 +745,7 @@ export default function PremiumRegistrationForm({
                       onChange={() => {
                         setSelectedPlanType('custom')
                         setSelectedDbPlan(null)
+                        setTotalAmount('')
                         setAmountPaid('')
                         setPdfAmount('')
                       }}
@@ -768,8 +783,8 @@ export default function PremiumRegistrationForm({
                       <input type="date" name="endDate" value={endDate} readOnly style={{background: '#F0F4FF', color: '#4566B0', cursor: 'not-allowed'}} />
                     </div>
                     <div className="field">
-                      <label>Actual Amount Paid (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(for admin records)</span></label>
-                      <input type="number" name="amountPaid" placeholder="e.g. 999" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
+                      <label>Total Agreed Amount (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(after discount)</span></label>
+                      <input type="number" name="totalAmount" placeholder="e.g. 10000" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} required />
                       {isAdmin && (
                         <div style={{display:'flex', gap:'6px', marginTop:'8px', flexWrap:'wrap'}}>
                           {[10, 20, 25, 30].map(pct => (
@@ -777,13 +792,10 @@ export default function PremiumRegistrationForm({
                               key={pct}
                               type="button"
                               onClick={() => {
-                                const basePrice = selectedDbPlan ? selectedDbPlan.price : 0
+                                const basePrice = selectedDbPlan ? selectedDbPlan.price : (Number(totalAmount) || 0)
                                 if (basePrice > 0) {
                                   const discounted = Math.round(basePrice - (basePrice * (pct / 100)))
-                                  setAmountPaid(String(discounted))
-                                } else if (amountPaid) {
-                                  const current = Number(amountPaid)
-                                  const discounted = Math.round(current - (current * (pct / 100)))
+                                  setTotalAmount(String(discounted))
                                   setAmountPaid(String(discounted))
                                 }
                               }}
@@ -797,6 +809,14 @@ export default function PremiumRegistrationForm({
                           ))}
                         </div>
                       )}
+                    </div>
+                    <div className="field">
+                      <label>Amount Paid Now (₹) <span className="req">*</span></label>
+                      <input type="number" name="amountPaid" placeholder="e.g. 5000" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
+                    </div>
+                    <div className="field">
+                      <label>Pending Dues (₹)</label>
+                      <input type="number" name="pendingDues" value={pendingDues} readOnly style={{background: '#FFEAEA', color: '#D32F2F', cursor: 'not-allowed', fontWeight: 'bold'}} />
                     </div>
                     <div className="field">
                       <label>PDF / Contract Amount (₹) <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(shown on PDF)</span></label>
