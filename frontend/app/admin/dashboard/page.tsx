@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Users, UserPlus, IndianRupee, Activity, TrendingUp, Dumbbell, Calendar, Clock } from 'lucide-react'
 import { api } from '@/lib/api'
+import Link from 'next/link'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-import { getDashboardStats, getExpiringMembers } from '@/app/actions/dashboard'
+import { getDashboardStats, getExpiringMembers, getRevenueChartData } from '@/app/actions/dashboard'
 import { MessageCircle } from 'lucide-react'
 
 export default function AdminDashboard() {
@@ -16,16 +18,19 @@ export default function AdminDashboard() {
     expiringMembershipsCount: 0
   })
   const [expiringMembers, setExpiringMembers] = useState<any[]>([])
+  const [chartData, setChartData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadStats() {
-      const [data, expiring] = await Promise.all([
+      const [data, expiring, chart] = await Promise.all([
         getDashboardStats(),
-        getExpiringMembers()
+        getExpiringMembers(),
+        getRevenueChartData()
       ])
       setStats(data)
       setExpiringMembers(expiring)
+      setChartData(chart)
       setLoading(false)
     }
     loadStats()
@@ -48,9 +53,9 @@ export default function AdminDashboard() {
           <p className="text-zinc-400 text-sm mt-1">Here's what's happening at Milestone Energym today.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="bg-brand-gold text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-brand-gold/90 transition-colors">
+          <Link href="/admin/members/new" className="bg-brand-gold text-black font-semibold px-4 py-2 rounded-lg text-sm hover:bg-brand-gold/90 transition-colors">
             + New Member
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -97,17 +102,37 @@ export default function AdminDashboard() {
         {/* Main Chart / Analytics Area */}
         <div className="lg:col-span-2 bg-zinc-900 border border-white/5 rounded-xl p-6 min-h-[400px] flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-white">Revenue Overview</h2>
-            <select className="bg-zinc-800 border border-white/10 rounded-md text-xs px-2 py-1 text-zinc-300 focus:outline-none">
-              <option>This Month</option>
-              <option>Last Month</option>
-              <option>This Year</option>
-            </select>
+            <h2 className="text-lg font-bold text-white">Revenue Overview (Last 6 Months)</h2>
           </div>
-          <div className="flex-1 flex items-center justify-center border border-dashed border-white/10 rounded-lg bg-zinc-950/50">
-            <p className="text-zinc-500 text-sm flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" /> Chart Integration Pending
-            </p>
+          <div className="flex-1 flex items-center justify-center border border-dashed border-white/10 rounded-lg bg-zinc-950/50 p-4">
+            {loading ? (
+              <p className="text-zinc-500 text-sm flex items-center gap-2">
+                <Activity className="w-4 h-4 animate-spin" /> Loading chart...
+              </p>
+            ) : chartData.length === 0 ? (
+              <p className="text-zinc-500 text-sm flex items-center gap-2">
+                No revenue data available.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#d4af37" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#d4af37" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
+                  <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff' }}
+                    itemStyle={{ color: '#d4af37' }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#d4af37" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 

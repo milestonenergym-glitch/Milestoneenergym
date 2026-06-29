@@ -131,3 +131,48 @@ export async function getExpiringMembers() {
     return []
   }
 }
+
+export async function getRevenueChartData() {
+  try {
+    const today = new Date()
+    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 1)
+
+    const payments = await prisma.payment.findMany({
+      where: {
+        status: 'SUCCESS',
+        createdAt: {
+          gte: sixMonthsAgo
+        }
+      },
+      select: {
+        amount: true,
+        createdAt: true
+      }
+    })
+
+    // Group by month
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const dataMap = new Map()
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+      const monthStr = months[d.getMonth()]
+      dataMap.set(monthStr, { name: monthStr, revenue: 0 })
+    }
+
+    // Populate data
+    payments.forEach(p => {
+      const monthStr = months[p.createdAt.getMonth()]
+      if (dataMap.has(monthStr)) {
+        const existing = dataMap.get(monthStr)
+        existing.revenue += p.amount
+      }
+    })
+
+    return Array.from(dataMap.values())
+  } catch (error) {
+    console.error('Failed to get chart data:', error)
+    return []
+  }
+}
