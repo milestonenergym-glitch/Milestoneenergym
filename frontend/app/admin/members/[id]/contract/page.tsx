@@ -379,7 +379,7 @@ export default async function MemberContractPage({
           <div className="header">
             <div className="logo-box">
               {settings?.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <img src={settings.logoUrl} alt="Logo" style={{ width: '64px', height: '64px', objectFit: 'contain', display: 'block', borderRadius: '10px' }} />
               ) : 'ME'}
             </div>
             <div className="brand">
