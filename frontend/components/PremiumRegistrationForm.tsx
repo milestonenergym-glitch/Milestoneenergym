@@ -765,6 +765,33 @@ export default function PremiumRegistrationForm({
                   <div className="field">
                     <label>Actual Amount Paid (₹) <span className="req">*</span> <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(for admin records)</span></label>
                     <input type="number" name="amountPaid" placeholder="e.g. 999" value={amountPaid} onChange={(e) => setAmountPaid(e.target.value)} required />
+                    {isAdmin && (
+                      <div style={{display:'flex', gap:'6px', marginTop:'8px', flexWrap:'wrap'}}>
+                        {[10, 20, 25, 30].map(pct => (
+                          <button 
+                            key={pct}
+                            type="button"
+                            onClick={() => {
+                              const basePrice = selectedDbPlan ? selectedDbPlan.price : 0
+                              if (basePrice > 0) {
+                                const discounted = Math.round(basePrice - (basePrice * (pct / 100)))
+                                setAmountPaid(String(discounted))
+                              } else if (amountPaid) {
+                                const current = Number(amountPaid)
+                                const discounted = Math.round(current - (current * (pct / 100)))
+                                setAmountPaid(String(discounted))
+                              }
+                            }}
+                            style={{
+                              fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '6px',
+                              background: '#E0E7F5', color: '#1A4BD4', border: '1px solid #C2D1F0', cursor: 'pointer'
+                            }}
+                          >
+                            {pct}% OFF
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="field">
                     <label>PDF / Contract Amount (₹) <span style={{fontWeight:400,textTransform:'none',fontSize:'10px',color:'#6B7A99'}}>(shown on PDF)</span></label>
