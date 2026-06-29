@@ -78,7 +78,7 @@ export default function GrandOpeningPopup() {
     confettiInterval = setInterval(spawnConfetti, 350)
 
     // Countdown Timer
-    const target = new Date('2025-07-09T10:00:00')
+    const target = new Date('2026-07-09T10:00:00')
     const updateCountdown = () => {
       const now = new Date()
       let diff = Math.max(0, target.getTime() - now.getTime())
@@ -104,7 +104,18 @@ export default function GrandOpeningPopup() {
   const pad = (n: number) => String(n).padStart(2, '0')
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+      onClick={() => setIsOpen(false)}
+    >
+      <button 
+        onClick={() => setIsOpen(false)} 
+        className="fixed top-4 right-4 md:top-8 md:right-8 w-10 h-10 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full flex items-center justify-center text-white text-2xl z-[100000] transition-all cursor-pointer"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&family=Oswald:wght@400;700&display=swap');
         
@@ -118,34 +129,12 @@ export default function GrandOpeningPopup() {
           font-family: 'Rajdhani', sans-serif;
           border-radius: 14px;
           box-shadow: 0 0 40px rgba(0,0,0,0.8);
-          margin: 20px auto;
+          margin: auto;
+          margin-top: 40px;
+          margin-bottom: 40px;
         }
         .grand-opening-poster * {
           box-sizing: border-box;
-        }
-        
-        /* Modal Close Button */
-        .close-modal-btn {
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: rgba(255,255,255,0.1);
-          border: 1px solid rgba(255,255,255,0.3);
-          color: white;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 20px;
-          cursor: pointer;
-          z-index: 50;
-          transition: all 0.3s;
-        }
-        .close-modal-btn:hover {
-          background: rgba(255,255,255,0.2);
-          transform: scale(1.1);
         }
 
         .poster-stars { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
@@ -417,9 +406,6 @@ export default function GrandOpeningPopup() {
       `}} />
 
       <div className="grand-opening-poster" onClick={(e) => e.stopPropagation()}>
-        <button onClick={() => setIsOpen(false)} className="close-modal-btn" aria-label="Close">
-          ×
-        </button>
         
         <div className="poster-glow-top"></div>
         <div className="poster-stars" ref={starsRef}></div>
@@ -451,7 +437,7 @@ export default function GrandOpeningPopup() {
           <div className="poster-grand-shine"></div>
           <span className="poster-grand-emoji">🎉🎊🎉</span>
           <div className="poster-grand-title">GRAND OPENING</div>
-          <div className="poster-grand-date"><span>9TH JULY</span> 2025</div>
+          <div className="poster-grand-date"><span>9TH JULY</span> 2026</div>
         </div>
 
         {/* WE ARE OPEN */}
@@ -474,7 +460,7 @@ export default function GrandOpeningPopup() {
           <div className="poster-info-box">
             <span className="poster-info-icon">📅</span>
             <span className="poster-info-label">DATE</span>
-            <div className="poster-info-val">9th July 2025</div>
+            <div className="poster-info-val">9th July 2026</div>
           </div>
           <div className="poster-info-box">
             <span className="poster-info-icon">⏰</span>
@@ -501,7 +487,7 @@ export default function GrandOpeningPopup() {
 
         <div className="poster-footer-address">
           <p>नवलराम की चक्की, Near Crown Plaza NH68, Barmer, Rajasthan — 344001</p>
-          <p style={{ color: '#888', marginTop: '3px' }}>Offer valid on 9th July 2025 only. Limited memberships at this price.</p>
+          <p style={{ color: '#888', marginTop: '3px' }}>Offer valid on 9th July 2026 only. Limited memberships at this price.</p>
         </div>
       </div>
     </div>
