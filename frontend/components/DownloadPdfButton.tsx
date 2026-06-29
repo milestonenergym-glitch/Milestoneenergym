@@ -5,11 +5,13 @@ import React, { useState, useEffect } from 'react'
 export default function DownloadPdfButton({ 
   memberName, 
   sequentialId,
-  autoDownload
+  autoDownload,
+  autoPrint
 }: { 
   memberName: string, 
   sequentialId: string,
-  autoDownload?: boolean
+  autoDownload?: boolean,
+  autoPrint?: boolean
 }) {
   const [isDownloading, setIsDownloading] = useState(false)
 
@@ -18,9 +20,12 @@ export default function DownloadPdfButton({
     let timeoutId: NodeJS.Timeout;
 
     if (autoDownload && mounted) {
-      // Small delay to ensure images/fonts are loaded before auto-download
       timeoutId = setTimeout(() => {
         handleDownload()
+      }, 800)
+    } else if (autoPrint && mounted) {
+      timeoutId = setTimeout(() => {
+        handlePrint()
       }, 800)
     }
 
@@ -28,7 +33,7 @@ export default function DownloadPdfButton({
       mounted = false;
       if (timeoutId) clearTimeout(timeoutId);
     }
-  }, [autoDownload])
+  }, [autoDownload, autoPrint])
 
   const handlePrint = () => {
     const originalTitle = document.title;

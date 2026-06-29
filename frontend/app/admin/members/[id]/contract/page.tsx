@@ -366,6 +366,7 @@ export default async function MemberContractPage({
             memberName={member.name || 'Member'} 
             sequentialId={sequentialId} 
             autoDownload={resolvedSearchParams?.download === 'true'}
+            autoPrint={resolvedSearchParams?.print === 'true'}
           />
         </div>
 

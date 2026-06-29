@@ -304,7 +304,7 @@ export default function MembersPage() {
                     </td>
                     <td className="px-6 py-4 text-right flex justify-end gap-2">
                       <Link 
-                        href={`/admin/members/${member.id}/contract`}
+                        href={`/admin/members/${member.id}/contract?print=true`}
                         target="_blank"
                         className="text-zinc-500 hover:text-brand-gold transition-colors p-2 rounded-lg hover:bg-white/5"
                         title="Print Contract"
