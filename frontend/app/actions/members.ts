@@ -197,6 +197,12 @@ export async function assignMembershipToMember(userId: string, data: any) {
         })
       }
 
+      // Mark existing memberships as EXPIRED so the new one takes precedence
+      await tx.membership.updateMany({
+        where: { userId },
+        data: { status: 'EXPIRED' }
+      })
+
       // 1. Create the membership
       await tx.membership.create({
         data: {

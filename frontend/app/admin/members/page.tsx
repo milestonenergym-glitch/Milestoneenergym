@@ -20,6 +20,7 @@ export default function MembersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<any>(null)
+  const [isRenewing, setIsRenewing] = useState(false)
   const [selectedPackage, setSelectedPackage] = useState<string>('')
   
   // Plan assignment state
@@ -129,8 +130,9 @@ export default function MembersPage() {
   const openEditModal = (member: any) => {
     setEditingMember(member)
     setIsEditModalOpen(true)
-    // Reset plan assignment fields
+    setIsRenewing(false)
     setAssignDurationMonths('')
+    setAssignStartDate(new Date().toISOString().split('T')[0])
     setAssignActualAmount('')
     setAssignPdfAmount('')
     setAssignPaymentMode('CASH')
@@ -616,10 +618,20 @@ export default function MembersPage() {
                 </button>
               </div>
 
-              {editingMember.memberships?.length > 0 ? (
+              {editingMember.memberships?.length > 0 && !isRenewing ? (
                 <div className="bg-brand-gold/10 border border-brand-gold/20 p-4 rounded-xl">
                   <p className="text-brand-gold mb-2 font-semibold">Active Plan Exists</p>
-                  <p className="text-sm text-zinc-400">This member already has an active plan: {editingMember.memberships[0].plan.name}.</p>
+                  <p className="text-sm text-zinc-400 mb-4">This member already has an active plan: {editingMember.memberships[0].plan.name}.</p>
+                  <button 
+                    onClick={() => {
+                      setIsRenewing(true);
+                      const lastEndDate = new Date(editingMember.memberships[0].endDate);
+                      setAssignStartDate(lastEndDate.toISOString().split('T')[0]);
+                    }}
+                    className="w-full bg-brand-gold text-black font-bold py-2 rounded-lg hover:bg-brand-gold/90 transition-colors"
+                  >
+                    Renew / Extend Plan
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleAssignPlan} className="space-y-4">
