@@ -15,6 +15,7 @@ import FreeTrialForm from '@/components/public/home/FreeTrialForm'
 import BlogPreview from '@/components/public/home/BlogPreview'
 import GoogleMapSection from '@/components/public/home/GoogleMapSection'
 import CTABanner from '@/components/public/home/CTABanner'
+import GrandOpeningPopup from '@/components/public/home/GrandOpeningPopup'
 import { getGymSettings } from '@/app/actions/settings'
 import { preload } from 'react-dom'
 
@@ -53,6 +54,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <GrandOpeningPopup />
       <Navbar />
       <HeroSection />
       <StatsBar settings={settings} />
