@@ -5,7 +5,8 @@ import { motion } from 'framer-motion'
 import { Users, UserPlus, IndianRupee, Activity, TrendingUp, Dumbbell, Calendar, Clock } from 'lucide-react'
 import { api } from '@/lib/api'
 
-import { getDashboardStats } from '@/app/actions/dashboard'
+import { getDashboardStats, getExpiringMembers } from '@/app/actions/dashboard'
+import { MessageCircle } from 'lucide-react'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -14,12 +15,17 @@ export default function AdminDashboard() {
     monthlyRevenue: 0,
     expiringMembershipsCount: 0
   })
+  const [expiringMembers, setExpiringMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function loadStats() {
-      const data = await getDashboardStats()
+      const [data, expiring] = await Promise.all([
+        getDashboardStats(),
+        getExpiringMembers()
+      ])
       setStats(data)
+      setExpiringMembers(expiring)
       setLoading(false)
     }
     loadStats()
@@ -124,23 +130,64 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* Expiring Soon / Renewals */}
           <div className="bg-zinc-900 border border-white/5 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-3 relative">
-                  {i !== 3 && <div className="absolute left-[11px] top-7 bottom-[-16px] w-px bg-white/10" />}
-                  <div className="w-6 h-6 rounded-full bg-brand-gold/20 flex items-center justify-center shrink-0 border border-brand-gold/30 mt-0.5">
-                    <Clock className="w-3 h-3 text-brand-gold" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-white font-medium">Rahul Sharma Checked In</p>
-                    <p className="text-xs text-zinc-500">10 mins ago</p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-white">Expiring Soon</h2>
+              <span className="bg-red-500/10 text-red-500 text-xs px-2 py-1 rounded-full font-medium">Action Needed</span>
             </div>
+            
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-16 bg-zinc-800/50 rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : expiringMembers.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-zinc-500 text-sm">No memberships expiring soon. Great job!</p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {expiringMembers.map((membership: any) => {
+                  const daysLeft = Math.ceil((new Date(membership.endDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))
+                  const isExpired = daysLeft < 0
+                  
+                  const message = `Hi ${membership.user.name || 'Member'}, your gym membership at Milestone Energym ${isExpired ? 'expired' : 'is expiring'} on ${new Date(membership.endDate).toLocaleDateString('en-IN')}. Please renew to avoid interruptions.`
+                  const waLink = `https://wa.me/91${membership.user.profile?.phone?.replace(/\D/g, '') || ''}?text=${encodeURIComponent(message)}`
+
+                  return (
+                    <div key={membership.id} className="flex flex-col gap-2 p-3 rounded-lg bg-zinc-800/50 border border-white/5">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm text-white font-medium">{membership.user.name || 'Unknown User'}</p>
+                          <p className="text-xs text-zinc-400 mt-0.5">{membership.plan.name}</p>
+                        </div>
+                        <div className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${isExpired ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                          {isExpired ? 'Expired' : `${daysLeft} days left`}
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mt-1 pt-2 border-t border-white/5">
+                        <span className="text-xs text-zinc-500">
+                          {new Date(membership.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </span>
+                        
+                        <a 
+                          href={waLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 px-3 py-1.5 rounded-md transition-colors font-medium"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          Remind
+                        </a>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
         </div>
