@@ -64,7 +64,7 @@ export async function getMemberSequentialId(createdAt: Date) {
 
 export async function createMember(data: any) {
   try {
-    const { name, email, phone, planId, durationInDays, amountPaid, pdfAmount, paymentMode, ...profileData } = data
+    const { name, email, phone, planId, durationMonths, durationInDays, amountPaid, pdfAmount, paymentMode, ...profileData } = data
 
     // Create User, Profile, and initial Membership in a transaction
     const user = await prisma.$transaction(async (tx) => {
@@ -82,15 +82,38 @@ export async function createMember(data: any) {
         }
       })
 
-      if (planId) {
+      let finalPlanId = planId;
+      let finalDurationInDays = Number(durationInDays);
+
+      if (durationMonths && !finalPlanId) {
+        const planName = `${durationMonths} Month${durationMonths > 1 ? 's' : ''}`
+        let plan = await tx.plan.findFirst({
+          where: { name: planName }
+        })
+
+        if (!plan) {
+          plan = await tx.plan.create({
+            data: {
+              name: planName,
+              durationInDays: Number(durationMonths) * 30,
+              price: 0,
+              isActive: false
+            }
+          })
+        }
+        finalPlanId = plan.id;
+        finalDurationInDays = plan.durationInDays;
+      }
+
+      if (finalPlanId) {
         const startDate = new Date()
         const endDate = new Date()
-        endDate.setDate(endDate.getDate() + Number(durationInDays))
+        endDate.setDate(endDate.getDate() + finalDurationInDays)
 
         await tx.membership.create({
           data: {
             userId: newUser.id,
-            planId,
+            planId: finalPlanId,
             startDate,
             endDate,
             amountPaid: Number(amountPaid),
@@ -157,7 +180,8 @@ export async function assignMembershipToMember(userId: string, data: any) {
 
     await prisma.$transaction(async (tx) => {
       // Find or create a plan for this duration
-      const planName = `${durationMonths} Month${durationMonths > 1 ? 's' : ''}`
+      const durationMonthsNum = Number(durationMonths)
+      const planName = `${durationMonthsNum} Month${durationMonthsNum > 1 ? 's' : ''}`
       let plan = await tx.plan.findFirst({
         where: { name: planName }
       })
@@ -166,7 +190,7 @@ export async function assignMembershipToMember(userId: string, data: any) {
         plan = await tx.plan.create({
           data: {
             name: planName,
-            durationInDays: Number(durationMonths) * 30,
+            durationInDays: durationMonthsNum * 30,
             price: 0,
             isActive: false // Hidden from standard plans
           }

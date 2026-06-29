@@ -20,7 +20,7 @@ export default function MembersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState<any>(null)
-  const [selectedPlanId, setSelectedPlanId] = useState<string>('')
+  const [selectedPackage, setSelectedPackage] = useState<string>('')
   
   // Plan assignment state
   const [assignDurationMonths, setAssignDurationMonths] = useState('')
@@ -62,8 +62,17 @@ export default function MembersPage() {
     e.preventDefault()
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
-    
-    const selectedPlan = plans.find(p => p.id === selectedPlanId)
+    const packageValue = formData.get('selectedPackage') as string
+    let planId: string | undefined = undefined
+    let durationMonths: number | undefined = undefined
+    let selectedPlan: any = null
+
+    if (packageValue.startsWith('custom_')) {
+      durationMonths = parseInt(packageValue.replace('custom_', ''))
+    } else if (packageValue) {
+      planId = packageValue
+      selectedPlan = plans.find(p => p.id === planId)
+    }
     
     const data = {
       name: formData.get('name'),
@@ -74,7 +83,8 @@ export default function MembersPage() {
       bloodGroup: formData.get('bloodGroup'),
       emergencyContact: formData.get('emergencyContact'),
       address: formData.get('address'),
-      planId: selectedPlanId || undefined,
+      planId,
+      durationMonths,
       durationInDays: selectedPlan?.durationInDays || 0,
       amountPaid: formData.get('amountPaid') || selectedPlan?.price || 0,
       pdfAmount: formData.get('pdfAmount') || null,
@@ -85,7 +95,7 @@ export default function MembersPage() {
     if (res.success) {
       toast.success('Member added successfully!')
       setIsModalOpen(false)
-      setSelectedPlanId('')
+      setSelectedPackage('')
       fetchData()
     } else {
       toast.error(res.error || 'Failed to add member')
@@ -454,35 +464,44 @@ export default function MembersPage() {
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-zinc-400 mb-3">Select Package</label>
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div 
-                          onClick={() => {
-                            setSelectedPlanId('');
-                            (document.getElementById('manualAmountPaid') as HTMLInputElement).value = '';
-                            (document.getElementById('manualPdfAmount') as HTMLInputElement).value = '';
-                          }}
-                          className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${!selectedPlanId ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
-                        >
-                          <div className={`font-bold ${!selectedPlanId ? 'text-brand-gold' : 'text-white'}`}>No Plan</div>
-                          <div className="text-sm text-zinc-400 mt-1">Profile only</div>
-                        </div>
-                        {plans.filter(p => p.isActive !== false).map(p => (
-                          <div 
-                            key={p.id}
-                            onClick={() => {
-                              setSelectedPlanId(p.id);
-                              (document.getElementById('manualAmountPaid') as HTMLInputElement).value = p.price.toString();
-                              (document.getElementById('manualPdfAmount') as HTMLInputElement).value = p.price.toString();
-                            }}
-                            className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedPlanId === p.id ? 'border-brand-gold bg-brand-gold/10' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
-                          >
-                            <div className={`font-bold ${selectedPlanId === p.id ? 'text-brand-gold' : 'text-white'}`}>{p.name}</div>
-                            <div className="text-sm text-zinc-400 mt-1">₹{p.price} / {p.durationInDays} days</div>
-                          </div>
-                        ))}
-                      </div>
-                      <input type="hidden" name="planId" value={selectedPlanId} />
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Select Package or Duration</label>
+                      <select 
+                        name="selectedPackage" 
+                        value={selectedPackage}
+                        className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none mb-4"
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedPackage(val);
+                          
+                          const amountInput = document.getElementById('manualAmountPaid') as HTMLInputElement;
+                          const pdfInput = document.getElementById('manualPdfAmount') as HTMLInputElement;
+                          
+                          if (!val.startsWith('custom_') && val !== '') {
+                            const plan = plans.find(p => p.id === val);
+                            if (plan) {
+                              if (amountInput) amountInput.value = plan.price.toString();
+                              if (pdfInput) pdfInput.value = plan.price.toString();
+                            }
+                          } else {
+                            if (amountInput) amountInput.value = '';
+                            if (pdfInput) pdfInput.value = '';
+                          }
+                        }}
+                      >
+                        <option value="">No Plan (Add Profile Only)</option>
+                        <optgroup label="Standard Packages">
+                          {plans.filter(p => p.isActive !== false).map(p => (
+                            <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="Custom Duration">
+                          {[...Array(15)].map((_, i) => (
+                            <option key={`custom_${i+1}`} value={`custom_${i+1}`}>
+                              {i+1} Month{i+1 > 1 ? 's' : ''}
+                            </option>
+                          ))}
+                        </optgroup>
+                      </select>
                     </div>
                     
                     <div>
@@ -618,7 +637,7 @@ export default function MembersPage() {
                       className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-gold transition-colors"
                     >
                       <option value="">Select duration...</option>
-                      {[...Array(12)].map((_, i) => (
+                      {[...Array(15)].map((_, i) => (
                         <option key={i + 1} value={i + 1}>
                           {i + 1} Month{i + 1 > 1 ? 's' : ''}
                         </option>
