@@ -8,8 +8,8 @@ export default function GoogleMapSection() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
 
-  const gymAddress = encodeURIComponent('नवलाराम की चक्की, Near Crown Plaza NH68 जैसलमेर रोड बाड़मेर, Barmer, Rajasthan-344001')
-  const googleMapsEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=${gymAddress}&zoom=15`
+  const gymAddress = encodeURIComponent('Milestone Energym, Near Crown Plaza NH68, Barmer, Rajasthan 344001')
+  const googleMapsEmbedUrl = `https://maps.google.com/maps?q=${gymAddress}&t=&z=15&ie=UTF8&iwloc=&output=embed`
   const navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${gymAddress}`
 
   return (
@@ -50,7 +50,6 @@ export default function GoogleMapSection() {
         >
           {/* Map */}
           <div className="lg:col-span-2 glass rounded-2xl overflow-hidden border border-white/10 h-[400px] relative">
-            {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
               <iframe
                 src={googleMapsEmbedUrl}
                 width="100%"
@@ -61,16 +60,6 @@ export default function GoogleMapSection() {
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Milestone Energym Location"
               />
-            ) : (
-              // Placeholder when no API key
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-blue/10 to-transparent">
-                <MapPin className="w-16 h-16 text-brand-blue/40 mb-4" />
-                <p className="text-white/40 text-sm text-center px-6">
-                  Google Maps will appear here.<br />
-                  Add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Info Card */}
