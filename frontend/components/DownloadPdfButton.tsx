@@ -46,9 +46,9 @@ export default function DownloadPdfButton({
       }
 
       const opt = {
-        margin:       0.5,
-        filename:     `Milestone_Contract_${sequentialId}_${memberName.replace(/\\s+/g, '_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
+        margin:       0,
+        filename:     `Milestone_Contract_${sequentialId}_${memberName.replace(/\s+/g, '_')}.pdf`,
+        image:        { type: 'jpeg', quality: 1 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
       } as any
