@@ -14,23 +14,40 @@ export default function DownloadPdfButton({
   const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
-    if (autoDownload) {
-      handleDownload()
+    let mounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    if (autoDownload && mounted) {
+      // Small delay to ensure images/fonts are loaded before auto-download
+      timeoutId = setTimeout(() => {
+        handleDownload()
+      }, 800)
+    }
+
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
     }
   }, [autoDownload])
 
   const handleDownload = async () => {
+    if (isDownloading) return;
+
     try {
       setIsDownloading(true)
-      // Dynamically import html2pdf.js to avoid SSR errors
-      const html2pdf = (await import('html2pdf.js')).default
+      // Safely import html2pdf for both ESM and CJS
+      const html2pdfModule = await import('html2pdf.js')
+      const html2pdf = html2pdfModule.default || (html2pdfModule as any)
       
       const element = document.getElementById('contract-content')
-      if (!element) return
+      if (!element) {
+        setIsDownloading(false)
+        return
+      }
 
       const opt = {
-        margin:       0.5, // 0.5 inches all around
-        filename:     `Milestone_Contract_${sequentialId}_${memberName.replace(/\s+/g, '_')}.pdf`,
+        margin:       0.5,
+        filename:     `Milestone_Contract_${sequentialId}_${memberName.replace(/\\s+/g, '_')}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
