@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { getMembers, createMember, updateMemberProfile, assignMembershipToMember } from '@/app/actions/members'
 import { getPlans } from '@/app/actions/plans'
 import { generateRegistrationLink } from '@/app/actions/registration-links'
-import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2 } from 'lucide-react'
+import { UserPlus, Search, MoreVertical, Phone, Calendar, Printer, Activity, X, MessageCircle, FileEdit, Link as LinkIcon, CheckCircle2, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -77,7 +77,9 @@ export default function MembersPage() {
       address: formData.get('address'),
       planId,
       durationInDays: selectedPlan?.durationInDays || 0,
-      amountPaid: selectedPlan?.price || 0,
+      amountPaid: formData.get('amountPaid') || selectedPlan?.price || 0,
+      pdfAmount: formData.get('pdfAmount') || null,
+      paymentMode: formData.get('paymentMode') || 'CASH',
     }
 
     const res = await createMember(data)
@@ -297,7 +299,15 @@ export default function MembersPage() {
                       >
                         <Printer className="w-4 h-4" />
                       </Link>
-                      <button 
+                      <Link 
+                        href={`/admin/members/${member.id}/contract?download=true`}
+                        target="_blank"
+                        className="text-zinc-500 hover:text-brand-gold transition-colors p-2 rounded-lg hover:bg-white/5"
+                        title="Download PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Link>
+                      <button  
                         onClick={() => openEditModal(member)}
                         className="text-zinc-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5"
                         title="Edit Member"
@@ -445,11 +455,41 @@ export default function MembersPage() {
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-zinc-400 mb-1">Select Package</label>
-                      <select name="planId" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
+                      <select 
+                        name="planId" 
+                        className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none mb-4"
+                        onChange={(e) => {
+                          const plan = plans.find(p => p.id === e.target.value);
+                          if (plan) {
+                            (document.getElementById('manualAmountPaid') as HTMLInputElement).value = plan.price.toString();
+                            (document.getElementById('manualPdfAmount') as HTMLInputElement).value = plan.price.toString();
+                          } else {
+                            (document.getElementById('manualAmountPaid') as HTMLInputElement).value = '';
+                            (document.getElementById('manualPdfAmount') as HTMLInputElement).value = '';
+                          }
+                        }}
+                      >
                         <option value="">No Plan (Add Profile Only)</option>
                         {plans.map(p => (
                           <option key={p.id} value={p.id}>{p.name} - ₹{p.price} ({p.durationInDays} days)</option>
                         ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Actual Amount (₹) <span className="text-xs text-zinc-500">(For System)</span></label>
+                      <input type="number" name="amountPaid" id="manualAmountPaid" placeholder="e.g. 5000" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">PDF Amount (₹) <span className="text-xs text-zinc-500">(Optional)</span></label>
+                      <input type="number" name="pdfAmount" id="manualPdfAmount" placeholder="e.g. 6000" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-zinc-400 mb-1">Mode of Payment</label>
+                      <select name="paymentMode" className="w-full bg-zinc-950 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-brand-gold appearance-none">
+                        <option value="CASH">Cash</option>
+                        <option value="UPI">UPI</option>
+                        <option value="CARD">Card</option>
                       </select>
                     </div>
                   </div>

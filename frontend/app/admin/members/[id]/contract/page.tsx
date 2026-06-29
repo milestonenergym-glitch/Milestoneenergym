@@ -6,8 +6,15 @@ import DownloadPdfButton from '@/components/DownloadPdfButton'
 // Optional: You can load a cursive font for the signature from Google Fonts
 // like 'Great Vibes' or 'Dancing Script'. We'll use inline styles for it.
 
-export default async function MemberContractPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function MemberContractPage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
   const [member, settings] = await Promise.all([
     getMemberById(resolvedParams.id),
     getGymSettings()
@@ -170,6 +177,7 @@ export default async function MemberContractPage({ params }: { params: Promise<{
         <DownloadPdfButton 
           memberName={member.name || 'Member'} 
           sequentialId={sequentialId} 
+          autoDownload={resolvedSearchParams?.download === 'true'}
         />
 
       </div>

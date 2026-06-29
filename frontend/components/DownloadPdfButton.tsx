@@ -1,15 +1,23 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 export default function DownloadPdfButton({ 
   memberName, 
-  sequentialId 
+  sequentialId,
+  autoDownload
 }: { 
   memberName: string, 
-  sequentialId: string 
+  sequentialId: string,
+  autoDownload?: boolean
 }) {
   const [isDownloading, setIsDownloading] = useState(false)
+
+  useEffect(() => {
+    if (autoDownload) {
+      handleDownload()
+    }
+  }, [autoDownload])
 
   const handleDownload = async () => {
     try {
